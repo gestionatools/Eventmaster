@@ -3,11 +3,13 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import {
   ChevronLeft, ChevronRight, Plus, X, Calendar, Filter,
-  RefreshCw, Search, Clock, User, Tag, Hash, Layers, CalendarDays, Download
+  RefreshCw, Search, Clock, User, Tag, Hash, Layers, CalendarDays, Download, Trash2
 } from 'lucide-react'
 import { supabase, EventRow } from '@/lib/supabase'
 import TopBar from '@/components/TopBar'
 import { cn } from '@/lib/utils'
+import CreateConvocatoriaModal from './CreateConvocatoriaModal'
+import DeleteConvocatoriaModal from './DeleteConvocatoriaModal'
 
 // ─── Color palette for convocatorias ──────────────────────────────────────────
 const CONVOCATORIA_COLORS = [
@@ -241,6 +243,10 @@ export default function CalendarPage() {
   const [saving, setSaving]                   = useState(false)
   const [saveError, setSaveError]             = useState<string | null>(null)
 
+  // Convocatoria modals
+  const [showCreateConvocatoria, setShowCreateConvocatoria] = useState(false)
+  const [showDeleteConvocatoria, setShowDeleteConvocatoria] = useState(false)
+
   // ── Fetch data ──────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -433,6 +439,23 @@ export default function CalendarPage() {
           className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-white/5 text-white/50 border border-white/10 hover:text-white/80 hover:bg-white/10 transition-all"
         >
           <Download className="w-3.5 h-3.5" /> Exportar ICS
+        </button>
+
+        {/* Delete convocatoria */}
+        <button
+          onClick={() => setShowDeleteConvocatoria(true)}
+          title="Borrar convocatoria"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 hover:text-red-300 transition-all"
+        >
+          <Trash2 className="w-3.5 h-3.5" /> Borrar
+        </button>
+
+        {/* Create convocatoria */}
+        <button
+          onClick={() => setShowCreateConvocatoria(true)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all"
+        >
+          <Calendar className="w-4 h-4" /> Crear convocatoria
         </button>
 
         {/* Create event */}
@@ -633,6 +656,24 @@ export default function CalendarPage() {
           onClose={() => setShowCreateModal(false)}
         />
       )}
+
+      {/* Create convocatoria modal */}
+      {showCreateConvocatoria && (
+        <CreateConvocatoriaModal
+          onClose={() => setShowCreateConvocatoria(false)}
+          onSuccess={() => { fetchData() }}
+        />
+      )}
+
+      {/* Delete convocatoria modal */}
+      {showDeleteConvocatoria && (
+        <DeleteConvocatoriaModal
+          convocatorias={convocatorias}
+          selectedConvocatoria={filterConvocatoria.length === 1 ? filterConvocatoria[0] : undefined}
+          onClose={() => setShowDeleteConvocatoria(false)}
+          onSuccess={() => { fetchData(); setFilterConvocatoria([]) }}
+        />
+      )}
     </div>
   )
 }
@@ -722,9 +763,9 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent }:
             >
               <span className="text-[10px] leading-none">{dayNum}</span>
               {colors.length > 0 && (
-                <div className="flex gap-px mt-0.5 flex-wrap justify-center max-w-full">
+                <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center max-w-full">
                   {colors.slice(0, 3).map((c, ci) => (
-                    <span key={ci} className={cn('w-1 h-1 rounded-full', c)} />
+                    <span key={ci} className={cn('w-1.5 h-1.5 rounded-full', c)} />
                   ))}
                 </div>
               )}
