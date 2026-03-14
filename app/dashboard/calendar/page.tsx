@@ -130,11 +130,11 @@ export default function CalendarPage() {
 
   // ── Derived data ────────────────────────────────────────────────────────────
   const convocatorias = useMemo(() =>
-    [...new Set(events.map(e => e.Convocatoria).filter(Boolean) as string[])].sort(),
+    Array.from(new Set(events.map(e => e.Convocatoria).filter(Boolean) as string[])).sort(),
     [events]
   )
   const tipos = useMemo(() =>
-    [...new Set(events.map(e => e.Tipo).filter(Boolean) as string[])].sort(),
+    Array.from(new Set(events.map(e => e.Tipo).filter(Boolean) as string[])).sort(),
     [events]
   )
   const colorMap = useMemo(() => {
