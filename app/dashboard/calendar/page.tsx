@@ -209,6 +209,7 @@ function exportToICS(events: ParsedEvent[]) {
 // ─── Types ───────────────────────────────────────────────────────────────────
 type ParsedEvent = EventRow & { _date: Date | null }
 type ViewMode = 'year' | 'month'
+type MonthSpec = { year: number; month: number }
 
 const EMPTY_FORM: Partial<EventRow> = {
   ID: '', CÓDIGO: '', Convocatoria: '', Actividad: '', Sesión: '',
@@ -305,6 +306,23 @@ export default function CalendarPage() {
     })
   }, [events, filterConvocatoria, filterTipo, filterCodigo, filterTypes])
 
+  // ── Cross-year range: when 1-3 convocatorias selected, show their full span ─
+  const crossYearRange = useMemo<MonthSpec[] | null>(() => {
+    if (filterConvocatoria.length < 1 || filterConvocatoria.length > 3) return null
+    const dated = filteredEvents.filter(e => e._date)
+    if (dated.length === 0) return null
+    const minDate = dated.reduce((m, e) => e._date! < m ? e._date! : m, dated[0]._date!)
+    const maxDate = dated.reduce((m, e) => e._date! > m ? e._date! : m, dated[0]._date!)
+    const specs: MonthSpec[] = []
+    const cur = new Date(minDate.getFullYear(), minDate.getMonth(), 1)
+    const end = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1)
+    while (cur <= end) {
+      specs.push({ year: cur.getFullYear(), month: cur.getMonth() })
+      cur.setMonth(cur.getMonth() + 1)
+    }
+    return specs
+  }, [filterConvocatoria, filteredEvents])
+
   // ── Navigation ──────────────────────────────────────────────────────────────
   const year  = currentDate.getFullYear()
   const month = currentDate.getMonth()
@@ -377,7 +395,17 @@ export default function CalendarPage() {
     <div className="animate-fade-in">
       <TopBar
         title="Calendario"
-        subtitle={viewMode === 'year' ? `${year}` : `${MONTHS_ES[month]} ${year}`}
+        subtitle={
+          viewMode === 'year' && crossYearRange && crossYearRange.length > 0
+            ? (() => {
+                const first = crossYearRange[0]
+                const last = crossYearRange[crossYearRange.length - 1]
+                if (first.year === last.year)
+                  return `${MONTHS_ES[first.month]} – ${MONTHS_ES[last.month]} ${first.year}`
+                return `${MONTHS_ES[first.month]} ${first.year} – ${MONTHS_ES[last.month]} ${last.year}`
+              })()
+            : viewMode === 'year' ? `${year}` : `${MONTHS_ES[month]} ${year}`
+        }
         onRefresh={handleRefresh}
         isRefreshing={refreshing}
       />
@@ -601,6 +629,7 @@ export default function CalendarPage() {
           colorMap={colorMap}
           onDayClick={openDayView}
           onCreateEvent={openCreate}
+          customMonths={crossYearRange ?? undefined}
         />
       ) : (
         <MonthView
@@ -682,37 +711,43 @@ export default function CalendarPage() {
 }
 
 // ─── Year View ────────────────────────────────────────────────────────────────
-function YearView({ year, events, colorMap, onDayClick, onCreateEvent }: {
+function YearView({ year, events, colorMap, onDayClick, onCreateEvent, customMonths }: {
   year: number
   events: ParsedEvent[]
   colorMap: Map<string, typeof CONVOCATORIA_COLORS[0]>
   onDayClick: (d: Date) => void
   onCreateEvent: (d: Date) => void
+  customMonths?: MonthSpec[]
 }) {
+  const months: MonthSpec[] = customMonths ?? Array.from({ length: 12 }, (_, mi) => ({ year, month: mi }))
+  const showYear = customMonths != null && customMonths.some(m => m.year !== customMonths[0].year)
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-      {Array.from({ length: 12 }, (_, mi) => (
+      {months.map(({ year: y, month: mi }) => (
         <MiniMonth
-          key={mi}
-          year={year}
+          key={`${y}-${mi}`}
+          year={y}
           month={mi}
           events={events}
           colorMap={colorMap}
           onDayClick={onDayClick}
           onCreateEvent={onCreateEvent}
+          showYear={showYear}
         />
       ))}
     </div>
   )
 }
 
-function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent }: {
+function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, showYear }: {
   year: number
   month: number
   events: ParsedEvent[]
   colorMap: Map<string, typeof CONVOCATORIA_COLORS[0]>
   onDayClick: (d: Date) => void
   onCreateEvent: (d: Date) => void
+  showYear?: boolean
 }) {
   const today = new Date()
   const firstDay = new Date(year, month, 1)
@@ -729,7 +764,10 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent }:
   return (
     <div className="glass-card p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-white/80 text-sm font-semibold">{MONTHS_ES[month]}</h3>
+        <h3 className="text-white/80 text-sm font-semibold">
+          {MONTHS_ES[month]}
+          {showYear && <span className="text-white/40 text-xs font-normal ml-1.5">{year}</span>}
+        </h3>
         <span className="text-white/30 text-xs">{monthEvents.length} ev.</span>
       </div>
       <div className="grid grid-cols-7 gap-0.5 mb-1">
