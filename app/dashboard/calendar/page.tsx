@@ -30,35 +30,45 @@ const MONTHS_ES = [
 const DAYS_ES = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom']
 
 // ─── Date parsing ─────────────────────────────────────────────────────────────
-function parseEventDate(row: EventRow): Date | null {
-  // Use || (not ??) so empty string also falls back to 'Día Mes'
-  const raw = row['Día'] || row['Día Mes'] || null
-  if (!raw) return null
+const SPANISH_MONTHS: Record<string, number> = {
+  ene:0, enero:0, feb:1, febrero:1, mar:2, marzo:2,
+  abr:3, abril:3, may:4, mayo:4, jun:5, junio:5,
+  jul:6, julio:6, ago:7, agosto:7, sep:8, septiembre:8, sept:8,
+  oct:9, octubre:9, nov:10, noviembre:10, dic:11, diciembre:11
+}
+
+function tryParseDate(raw: string | null | undefined): Date | null {
+  if (!raw || !raw.trim()) return null
+  const s = raw.trim()
 
   // Try ISO YYYY-MM-DD (parse manually to avoid UTC timezone offset shifting the date)
-  const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})/)
   if (isoMatch) return new Date(parseInt(isoMatch[1]), parseInt(isoMatch[2]) - 1, parseInt(isoMatch[3]))
 
-  // Try DD/MM/YYYY
-  const dmy = raw.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/)
+  // Try YYYY/MM/DD
+  const ymdSlash = s.match(/^(\d{4})\/(\d{2})\/(\d{2})/)
+  if (ymdSlash) return new Date(parseInt(ymdSlash[1]), parseInt(ymdSlash[2]) - 1, parseInt(ymdSlash[3]))
+
+  // Try DD/MM/YYYY or DD-MM-YYYY or DD.MM.YYYY
+  const dmy = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/)
   if (dmy) return new Date(parseInt(dmy[3]), parseInt(dmy[2]) - 1, parseInt(dmy[1]))
 
-  // Try "15 Ene 2024" or "15 enero 2024"
-  const spanishMonths: Record<string, number> = {
-    ene:0, enero:0, feb:1, febrero:1, mar:2, marzo:2,
-    abr:3, abril:3, may:4, mayo:4, jun:5, junio:5,
-    jul:6, julio:6, ago:7, agosto:7, sep:8, septiembre:8, sept:8,
-    oct:9, octubre:9, nov:10, noviembre:10, dic:11, diciembre:11
-  }
-  const textMatch = raw.toLowerCase().match(/(\d{1,2})\s+([a-záéíóú]+)(?:\s+(\d{4}))?/)
+  // Try "15 Ene 2024" or "15 enero 2024" or "15 de enero de 2024"
+  const textMatch = s.toLowerCase().match(/(\d{1,2})\s+(?:de\s+)?([a-záéíóú]+)(?:\s+(?:de\s+)?(\d{4}))?/)
   if (textMatch) {
     const day = parseInt(textMatch[1])
-    const month = spanishMonths[textMatch[2].substring(0, 3)] ?? spanishMonths[textMatch[2]]
+    const monthKey = textMatch[2].substring(0, 3)
+    const month = SPANISH_MONTHS[monthKey] ?? SPANISH_MONTHS[textMatch[2]]
     const year = textMatch[3] ? parseInt(textMatch[3]) : new Date().getFullYear()
     if (month !== undefined) return new Date(year, month, day)
   }
 
   return null
+}
+
+function parseEventDate(row: EventRow): Date | null {
+  // Try Día first; if it fails (null, empty, or unrecognised format), fall back to Día Mes
+  return tryParseDate(row['Día']) ?? tryParseDate(row['Día Mes'])
 }
 
 function sameDay(a: Date, b: Date): boolean {
