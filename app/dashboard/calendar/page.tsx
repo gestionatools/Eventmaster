@@ -306,17 +306,20 @@ export default function CalendarPage() {
     })
   }, [events, filterConvocatoria, filterTipo, filterCodigo, filterTypes])
 
-  // ── Cross-year range: when 1-3 convocatorias selected, show their full span ─
+  // ── Cross-year range: when 1-3 convocatorias selected and events span multiple years,
+  //    show exactly 12 months starting from the first event's month ─────────────────
   const crossYearRange = useMemo<MonthSpec[] | null>(() => {
     if (filterConvocatoria.length < 1 || filterConvocatoria.length > 3) return null
     const dated = filteredEvents.filter(e => e._date)
     if (dated.length === 0) return null
     const minDate = dated.reduce((m, e) => e._date! < m ? e._date! : m, dated[0]._date!)
     const maxDate = dated.reduce((m, e) => e._date! > m ? e._date! : m, dated[0]._date!)
+    // Only apply custom range if events span across different years
+    if (minDate.getFullYear() === maxDate.getFullYear()) return null
+    // Always show exactly 12 months starting from the first event's month
     const specs: MonthSpec[] = []
     const cur = new Date(minDate.getFullYear(), minDate.getMonth(), 1)
-    const end = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1)
-    while (cur <= end) {
+    for (let i = 0; i < 12; i++) {
       specs.push({ year: cur.getFullYear(), month: cur.getMonth() })
       cur.setMonth(cur.getMonth() + 1)
     }
