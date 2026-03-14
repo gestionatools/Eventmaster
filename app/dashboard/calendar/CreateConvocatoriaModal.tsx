@@ -9,7 +9,7 @@ import { supabase, EventRow } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 
 // ─── Template data ─────────────────────────────────────────────────────────────
-interface TemplateEventDef {
+export interface TemplateEventDef {
   slotId: string
   Actividad: string
   Sesión: string
@@ -18,13 +18,13 @@ interface TemplateEventDef {
   'Hora fin': string
 }
 
-interface DaySlot {
+export interface DaySlot {
   id: string
   label: string
   suggestedDay: string
 }
 
-const DAY_SLOTS: DaySlot[] = [
+export const DAY_SLOTS: DaySlot[] = [
   { id: 'kickoff1', label: 'KICKOFF – Día 1',     suggestedDay: 'Viernes'   },
   { id: 'kickoff2', label: 'KICKOFF – Día 2',     suggestedDay: 'Lunes'     },
   { id: 's2d1',     label: 'Sesión 2 – Día 1',   suggestedDay: 'Martes'    },
@@ -38,7 +38,7 @@ const DAY_SLOTS: DaySlot[] = [
   { id: 'cierre',   label: 'Fecha fin evaluación', suggestedDay: ''         },
 ]
 
-const TEMPLATE_EVENTS: TemplateEventDef[] = [
+export const TEMPLATE_EVENTS: TemplateEventDef[] = [
   // KICKOFF Día 1
   { slotId: 'kickoff1', Actividad: 'KICKOFF bienvenida / Inicio', Sesión: 'Online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '11:30' },
   // KICKOFF Día 2

@@ -10,6 +10,7 @@ import TopBar from '@/components/TopBar'
 import { cn } from '@/lib/utils'
 import CreateConvocatoriaModal from './CreateConvocatoriaModal'
 import DeleteConvocatoriaModal from './DeleteConvocatoriaModal'
+import CalendarEventModal from './CalendarEventModal'
 
 // ─── Color palette for convocatorias ──────────────────────────────────────────
 const CONVOCATORIA_COLORS = [
@@ -244,8 +245,9 @@ export default function CalendarPage() {
   const [saveError, setSaveError]             = useState<string | null>(null)
 
   // Convocatoria modals
-  const [showCreateConvocatoria, setShowCreateConvocatoria] = useState(false)
-  const [showDeleteConvocatoria, setShowDeleteConvocatoria] = useState(false)
+  const [showCreateConvocatoria, setShowCreateConvocatoria]         = useState(false)
+  const [showCalendarEventModal, setShowCalendarEventModal]         = useState(false)
+  const [showDeleteConvocatoria, setShowDeleteConvocatoria]         = useState(false)
 
   // ── Fetch data ──────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -450,9 +452,18 @@ export default function CalendarPage() {
           <Trash2 className="w-3.5 h-3.5" /> Borrar
         </button>
 
-        {/* Create convocatoria */}
+        {/* Create convocatoria – Excel import */}
         <button
           onClick={() => setShowCreateConvocatoria(true)}
+          title="Importar convocatoria desde Excel"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-white/5 text-white/50 border border-white/10 hover:text-white/80 hover:bg-white/10 transition-all"
+        >
+          <CalendarDays className="w-4 h-4" /> Importar Excel
+        </button>
+
+        {/* Create convocatoria – Calendar modal */}
+        <button
+          onClick={() => setShowCalendarEventModal(true)}
           className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all"
         >
           <Calendar className="w-4 h-4" /> Crear convocatoria
@@ -577,24 +588,6 @@ export default function CalendarPage() {
         )}
       </div>
 
-      {/* Color legend */}
-      {convocatorias.length > 0 && (
-        <div className="glass-card p-3 mb-4">
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-white/30 text-xs mr-1">Convocatorias:</span>
-            {convocatorias.map(c => {
-              const color = colorMap.get(c)
-              return (
-                <span key={c} className={cn('flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs border', color?.badge)}>
-                  <span className={cn('w-2 h-2 rounded-full', color?.dot)} />
-                  {c}
-                </span>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
       {/* Calendar */}
       {loading ? (
         <div className="glass-card p-12 flex items-center justify-center">
@@ -657,10 +650,20 @@ export default function CalendarPage() {
         />
       )}
 
-      {/* Create convocatoria modal */}
+      {/* Create convocatoria modal (Excel/template) */}
       {showCreateConvocatoria && (
         <CreateConvocatoriaModal
           onClose={() => setShowCreateConvocatoria(false)}
+          onSuccess={() => { fetchData() }}
+        />
+      )}
+
+      {/* Calendar event placement modal */}
+      {showCalendarEventModal && (
+        <CalendarEventModal
+          existingEvents={events}
+          colorMap={colorMap}
+          onClose={() => setShowCalendarEventModal(false)}
           onSuccess={() => { fetchData() }}
         />
       )}
