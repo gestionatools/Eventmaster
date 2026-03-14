@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import {
   ChevronLeft, ChevronRight, Plus, X, Calendar, Filter,
-  RefreshCw, Search, Clock, User, Tag, Hash, Layers, CalendarDays
+  RefreshCw, Search, Clock, User, Tag, Hash, Layers, CalendarDays, Download
 } from 'lucide-react'
 import { supabase, EventRow } from '@/lib/supabase'
 import TopBar from '@/components/TopBar'
@@ -28,6 +28,29 @@ const MONTHS_ES = [
   'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
 ]
 const DAYS_ES = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom']
+
+// ─── Convocatoria type classification ────────────────────────────────────────
+type ConvocatoriaType = 'normal' | 'analiza' | 'developers'
+
+function getConvocatoriaType(name: string | null | undefined): ConvocatoriaType {
+  if (!name) return 'normal'
+  const lower = name.toLowerCase()
+  if (lower.includes('analiza')) return 'analiza'
+  if (lower.includes('developers')) return 'developers'
+  return 'normal'
+}
+
+const CONVOCATORIA_TYPE_LABELS: Record<ConvocatoriaType, string> = {
+  normal: 'Convocatoria',
+  analiza: 'Analiza',
+  developers: 'Developers',
+}
+
+const CONVOCATORIA_TYPE_STYLES: Record<ConvocatoriaType, { active: string; dot: string }> = {
+  normal:     { active: 'bg-amber-500/20 text-amber-300 border-amber-500/40',    dot: 'bg-amber-400' },
+  analiza:    { active: 'bg-blue-500/20 text-blue-300 border-blue-500/40',       dot: 'bg-blue-400' },
+  developers: { active: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', dot: 'bg-emerald-400' },
+}
 
 // ─── Date parsing ─────────────────────────────────────────────────────────────
 const SPANISH_MONTHS: Record<string, number> = {
@@ -88,6 +111,87 @@ function parseTimeToMinutes(t: string | null | undefined): number | null {
   return h * 60 + m
 }
 
+// ─── ICS Export ──────────────────────────────────────────────────────────────
+function exportToICS(events: ParsedEvent[]) {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const lines: string[] = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Eventmaster//ES',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:Eventmaster',
+    'X-WR-TIMEZONE:Europe/Madrid',
+  ]
+
+  for (const ev of events) {
+    if (!ev._date) continue
+    const d = ev._date
+    const dateStr = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`
+    const startRaw = ev['Hora inicio']
+    const endRaw   = ev['Hora fin']
+
+    let dtStart: string
+    let dtEnd: string
+    let allDay = false
+
+    if (startRaw) {
+      const parts = startRaw.split(':').map(Number)
+      const sh = parts[0], sm = parts[1] ?? 0
+      dtStart = `${dateStr}T${pad(sh)}${pad(sm)}00`
+      if (endRaw) {
+        const ep = endRaw.split(':').map(Number)
+        dtEnd = `${dateStr}T${pad(ep[0])}${pad(ep[1] ?? 0)}00`
+      } else {
+        const endH = sh + 2
+        dtEnd = endH >= 24
+          ? `${dateStr}T235900`
+          : `${dateStr}T${pad(endH)}${pad(sm)}00`
+      }
+    } else {
+      allDay = true
+      dtStart = dateStr
+      // DTEND for all-day = next day in iCalendar spec
+      const next = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)
+      dtEnd = `${next.getFullYear()}${pad(next.getMonth() + 1)}${pad(next.getDate())}`
+    }
+
+    const summary = [ev.CÓDIGO, ev.Actividad].filter(Boolean).join(' - ') || 'Evento'
+    const uid = `${ev.ID || ev.CÓDIGO || Math.random().toString(36).slice(2)}-eventmaster`
+    const now = new Date()
+    const dtstamp = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}Z`
+
+    lines.push('BEGIN:VEVENT')
+    lines.push(`UID:${uid}`)
+    lines.push(`DTSTAMP:${dtstamp}`)
+    if (allDay) {
+      lines.push(`DTSTART;VALUE=DATE:${dtStart}`)
+      lines.push(`DTEND;VALUE=DATE:${dtEnd}`)
+    } else {
+      lines.push(`DTSTART:${dtStart}`)
+      lines.push(`DTEND:${dtEnd}`)
+    }
+    lines.push(`SUMMARY:${summary.replace(/[\\;,]/g, (c) => '\\' + c).replace(/\n/g, '\\n')}`)
+    if (ev.Convocatoria) lines.push(`CATEGORIES:${ev.Convocatoria}`)
+    const descParts = [ev.Actividad, ev.Sesión, ev.Tipo, ev.Agente].filter(Boolean)
+    if (descParts.length) lines.push(`DESCRIPTION:${descParts.join('\\n').replace(/\n/g, '\\n')}`)
+    lines.push('END:VEVENT')
+  }
+
+  lines.push('END:VCALENDAR')
+
+  const content = lines.join('\r\n')
+  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'eventmaster.ics'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 type ParsedEvent = EventRow & { _date: Date | null }
 type ViewMode = 'year' | 'month'
@@ -103,13 +207,14 @@ export default function CalendarPage() {
   const [events, setEvents]         = useState<ParsedEvent[]>([])
   const [loading, setLoading]       = useState(true)
   const [refreshing, setRefreshing] = useState(false)
-  const [viewMode, setViewMode]     = useState<ViewMode>('month')
+  const [viewMode, setViewMode]     = useState<ViewMode>('year')
   const [currentDate, setCurrentDate] = useState(new Date())
 
   // Filters
   const [filterConvocatoria, setFilterConvocatoria] = useState<string[]>([])
   const [filterTipo, setFilterTipo]                 = useState('')
   const [filterCodigo, setFilterCodigo]             = useState('')
+  const [filterTypes, setFilterTypes]               = useState<ConvocatoriaType[]>([])
   const [showFilters, setShowFilters]               = useState(false)
 
   // Selected event detail
@@ -176,9 +281,10 @@ export default function CalendarPage() {
         const code = (e.CÓDIGO ?? '').toLowerCase()
         if (!code.includes(filterCodigo.toLowerCase())) return false
       }
+      if (filterTypes.length > 0 && !filterTypes.includes(getConvocatoriaType(e.Convocatoria))) return false
       return true
     })
-  }, [events, filterConvocatoria, filterTipo, filterCodigo])
+  }, [events, filterConvocatoria, filterTipo, filterCodigo, filterTypes])
 
   // ── Navigation ──────────────────────────────────────────────────────────────
   const year  = currentDate.getFullYear()
@@ -240,7 +346,10 @@ export default function CalendarPage() {
     )
   }
 
-  const hasFilters = filterConvocatoria.length > 0 || filterTipo || filterCodigo
+  const hasFilters = filterConvocatoria.length > 0 || filterTipo || filterCodigo || filterTypes.length > 0
+
+  const toggleType = (t: ConvocatoriaType) =>
+    setFilterTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t])
 
   const handleRefresh = () => { setRefreshing(true); fetchData() }
 
@@ -304,6 +413,15 @@ export default function CalendarPage() {
               {filterConvocatoria.length + (filterTipo ? 1 : 0) + (filterCodigo ? 1 : 0)}
             </span>
           )}
+        </button>
+
+        {/* Export ICS */}
+        <button
+          onClick={() => exportToICS(filteredEvents)}
+          title="Exportar calendario (.ics) compatible con Outlook 365"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-white/5 text-white/50 border border-white/10 hover:text-white/80 hover:bg-white/10 transition-all"
+        >
+          <Download className="w-3.5 h-3.5" /> Exportar ICS
         </button>
 
         {/* Create event */}
@@ -387,6 +505,43 @@ export default function CalendarPage() {
           </div>
         </div>
       )}
+
+      {/* Convocatoria type selector */}
+      <div className="glass-card p-3 mb-4 flex flex-wrap gap-2 items-center">
+        <span className="text-white/30 text-xs uppercase tracking-wider mr-1">Tipo convocatoria:</span>
+        {(['normal', 'analiza', 'developers'] as ConvocatoriaType[]).map(type => {
+          const active = filterTypes.includes(type)
+          const style = CONVOCATORIA_TYPE_STYLES[type]
+          return (
+            <button
+              key={type}
+              onClick={() => toggleType(type)}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs border transition-all',
+                active
+                  ? style.active
+                  : 'bg-white/5 text-white/40 border-white/10 hover:text-white/70 hover:bg-white/10'
+              )}
+            >
+              <span className={cn(
+                'w-3.5 h-3.5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all',
+                active ? `${style.dot} border-current` : 'border-white/30'
+              )}>
+                {active && <span className="text-white text-[8px] font-bold leading-none">✓</span>}
+              </span>
+              {CONVOCATORIA_TYPE_LABELS[type]}
+            </button>
+          )
+        })}
+        {filterTypes.length > 0 && (
+          <button
+            onClick={() => setFilterTypes([])}
+            className="text-xs text-white/30 hover:text-white/60 ml-auto transition-all"
+          >
+            × limpiar
+          </button>
+        )}
+      </div>
 
       {/* Color legend */}
       {convocatorias.length > 0 && (
@@ -535,6 +690,7 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent }:
           const isToday = sameDay(date, today)
           const dayEvents = monthEvents.filter(e => e._date && sameDay(e._date, date))
           const colors = Array.from(new Set(dayEvents.map(e => colorMap.get(e.Convocatoria ?? '')?.dot).filter(Boolean))) as string[]
+          const hasPresencial = dayEvents.some(e => (e.Tipo ?? '').toLowerCase().includes('presencial'))
 
           return (
             <button
@@ -544,7 +700,11 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent }:
               title={`${dayNum} ${MONTHS_ES[month]} — ${dayEvents.length} evento(s)${dayEvents.length ? '\n' + dayEvents.map(e => e.Actividad || e.Convocatoria).join('\n') : ''}`}
               className={cn(
                 'aspect-square rounded flex flex-col items-center justify-center relative transition-all hover:bg-white/10 group',
-                isToday ? 'bg-brand-500/30 text-brand-300 font-bold' : 'text-white/50'
+                isToday
+                  ? 'bg-brand-500/30 text-brand-300 font-bold'
+                  : hasPresencial
+                    ? 'bg-orange-500/20 text-orange-300 font-semibold ring-1 ring-orange-500/60'
+                    : 'text-white/50'
               )}
             >
               <span className="text-[10px] leading-none">{dayNum}</span>
@@ -614,6 +774,7 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
           const firstColor = dayEvents.length > 0
             ? colorMap.get(dayEvents[0].Convocatoria ?? '')
             : null
+          const hasPresencial = dayEvents.some(e => (e.Tipo ?? '').toLowerCase().includes('presencial'))
 
           return (
             <div
@@ -621,17 +782,25 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
               onClick={() => onDayClick(date)}
               className={cn(
                 'group min-h-28 border-b border-white/5 p-1.5 flex flex-col cursor-pointer',
-                isToday ? 'bg-brand-500/5' : 'hover:bg-white/[0.03]',
+                isToday ? 'bg-brand-500/5' : hasPresencial ? 'bg-orange-500/5' : 'hover:bg-white/[0.03]',
               )}
             >
               {/* Day number */}
               <div className="flex items-center justify-between mb-1">
                 <span className={cn(
                   'w-7 h-7 flex items-center justify-center rounded-full text-xs font-medium relative overflow-hidden transition-all',
-                  isToday ? 'bg-brand-500 text-white' : (firstColor ? 'text-white/90' : 'text-white/50')
+                  isToday
+                    ? 'bg-brand-500 text-white'
+                    : hasPresencial
+                      ? 'text-white'
+                      : (firstColor ? 'text-white/90' : 'text-white/50')
                 )}>
-                  {/* Colored circle background for days with events */}
-                  {!isToday && firstColor && (
+                  {/* Presencial: strong orange ring */}
+                  {!isToday && hasPresencial && (
+                    <span className="absolute inset-0 rounded-full bg-orange-500/80 ring-2 ring-orange-400" />
+                  )}
+                  {/* Regular event: subtle color ring */}
+                  {!isToday && !hasPresencial && firstColor && (
                     <span className={cn('absolute inset-0 rounded-full', firstColor.ring)} />
                   )}
                   <span className="relative z-10">{dayNum}</span>
