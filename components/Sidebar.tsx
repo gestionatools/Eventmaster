@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Database, Zap, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Database, Zap, ChevronRight, CalendarDays } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/database', label: 'Base de Datos', icon: Database },
+  { href: '/dashboard/calendar', label: 'Calendario', icon: CalendarDays },
 ]
 
 export default function Sidebar() {
