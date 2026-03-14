@@ -2,13 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Database, Zap, ChevronRight, CalendarDays } from 'lucide-react'
+import { Database, Zap, ChevronRight, CalendarDays } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/database', label: 'Base de Datos', icon: Database },
   { href: '/dashboard/calendar', label: 'Calendario', icon: CalendarDays },
+  { href: '/dashboard/database', label: 'Base de Datos', icon: Database },
 ]
 
 export default function Sidebar() {
@@ -18,7 +17,7 @@ export default function Sidebar() {
     <aside className="fixed left-0 top-0 h-full w-64 glass-card rounded-none border-r border-white/10 flex flex-col z-50">
       {/* Logo */}
       <div className="p-6 border-b border-white/10">
-        <Link href="/dashboard" className="flex items-center gap-3 group">
+        <Link href="/dashboard/calendar" className="flex items-center gap-3 group">
           <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-accent-500 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/30 group-hover:shadow-brand-500/50 transition-all duration-300">
             <Zap className="w-5 h-5 text-white" />
           </div>
@@ -33,8 +32,7 @@ export default function Sidebar() {
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-thin">
         {navItems.map((item) => {
           const Icon = item.icon
-          const isActive = pathname === item.href ||
-            (item.href !== '/dashboard' && pathname.startsWith(item.href))
+          const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
 
           return (
             <Link key={item.href} href={item.href}>

@@ -52,6 +52,17 @@ const CONVOCATORIA_TYPE_STYLES: Record<ConvocatoriaType, { active: string; dot: 
   developers: { active: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', dot: 'bg-emerald-400' },
 }
 
+// Presencial highlight style varies by convocatoria type
+const PRESENCIAL_STYLES: Record<ConvocatoriaType, { cell: string; circle: string; ring: string }> = {
+  normal:     { cell: 'bg-orange-500/20 text-orange-300 ring-1 ring-orange-500/60',  circle: 'bg-orange-500/80 ring-2 ring-orange-400',   ring: 'bg-orange-500/5' },
+  analiza:    { cell: 'bg-blue-500/20 text-blue-300 ring-1 ring-blue-500/60',        circle: 'bg-blue-500/80 ring-2 ring-blue-400',       ring: 'bg-blue-500/5' },
+  developers: { cell: 'bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/60', circle: 'bg-emerald-500/80 ring-2 ring-emerald-400', ring: 'bg-emerald-500/5' },
+}
+
+function getPresencialStyle(convocatoria: string | null | undefined) {
+  return PRESENCIAL_STYLES[getConvocatoriaType(convocatoria)]
+}
+
 // ─── Date parsing ─────────────────────────────────────────────────────────────
 const SPANISH_MONTHS: Record<string, number> = {
   ene:0, enero:0, feb:1, febrero:1, mar:2, marzo:2,
@@ -572,7 +583,7 @@ export default function CalendarPage() {
           year={year}
           events={filteredEvents}
           colorMap={colorMap}
-          onDayClick={d => { setCurrentDate(d); setViewMode('month') }}
+          onDayClick={openDayView}
           onCreateEvent={openCreate}
         />
       ) : (
@@ -690,7 +701,9 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent }:
           const isToday = sameDay(date, today)
           const dayEvents = monthEvents.filter(e => e._date && sameDay(e._date, date))
           const colors = Array.from(new Set(dayEvents.map(e => colorMap.get(e.Convocatoria ?? '')?.dot).filter(Boolean))) as string[]
-          const hasPresencial = dayEvents.some(e => (e.Tipo ?? '').toLowerCase().includes('presencial'))
+          const firstPresencial = dayEvents.find(e => (e.Tipo ?? '').toLowerCase().includes('presencial'))
+          const hasPresencial = !!firstPresencial
+          const presencialStyle = firstPresencial ? getPresencialStyle(firstPresencial.Convocatoria) : null
 
           return (
             <button
@@ -703,7 +716,7 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent }:
                 isToday
                   ? 'bg-brand-500/30 text-brand-300 font-bold'
                   : hasPresencial
-                    ? 'bg-orange-500/20 text-orange-300 font-semibold ring-1 ring-orange-500/60'
+                    ? `font-semibold ${presencialStyle!.cell}`
                     : 'text-white/50'
               )}
             >
@@ -774,7 +787,9 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
           const firstColor = dayEvents.length > 0
             ? colorMap.get(dayEvents[0].Convocatoria ?? '')
             : null
-          const hasPresencial = dayEvents.some(e => (e.Tipo ?? '').toLowerCase().includes('presencial'))
+          const firstPresencial = dayEvents.find(e => (e.Tipo ?? '').toLowerCase().includes('presencial'))
+          const hasPresencial = !!firstPresencial
+          const presencialStyle = firstPresencial ? getPresencialStyle(firstPresencial.Convocatoria) : null
 
           return (
             <div
@@ -782,7 +797,7 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
               onClick={() => onDayClick(date)}
               className={cn(
                 'group min-h-28 border-b border-white/5 p-1.5 flex flex-col cursor-pointer',
-                isToday ? 'bg-brand-500/5' : hasPresencial ? 'bg-orange-500/5' : 'hover:bg-white/[0.03]',
+                isToday ? 'bg-brand-500/5' : hasPresencial ? presencialStyle!.ring : 'hover:bg-white/[0.03]',
               )}
             >
               {/* Day number */}
@@ -795,9 +810,9 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                       ? 'text-white'
                       : (firstColor ? 'text-white/90' : 'text-white/50')
                 )}>
-                  {/* Presencial: strong orange ring */}
+                  {/* Presencial: colored ring based on type */}
                   {!isToday && hasPresencial && (
-                    <span className="absolute inset-0 rounded-full bg-orange-500/80 ring-2 ring-orange-400" />
+                    <span className={cn('absolute inset-0 rounded-full', presencialStyle!.circle)} />
                   )}
                   {/* Regular event: subtle color ring */}
                   {!isToday && !hasPresencial && firstColor && (
