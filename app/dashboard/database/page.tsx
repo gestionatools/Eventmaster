@@ -21,16 +21,27 @@ export default function DatabasePage() {
     setLoading(true)
     setError(null)
     try {
-      const { data, error } = await supabase
-        .from(TABLE_NAME)
-        .select('*')
-        .limit(500)
+      const PAGE_SIZE = 1000
+      let allRows: Record<string, unknown>[] = []
+      let from = 0
+      let hasMore = true
 
-      if (error) throw error
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from(TABLE_NAME)
+          .select('*')
+          .range(from, from + PAGE_SIZE - 1)
 
-      const fetched = data || []
-      setRows(fetched)
-      setColumns(fetched.length > 0 ? Object.keys(fetched[0]) : [])
+        if (error) throw error
+
+        const fetched = data || []
+        allRows = allRows.concat(fetched)
+        hasMore = fetched.length === PAGE_SIZE
+        from += PAGE_SIZE
+      }
+
+      setRows(allRows)
+      setColumns(allRows.length > 0 ? Object.keys(allRows[0]) : [])
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error desconocido')
     } finally {
