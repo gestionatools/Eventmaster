@@ -11,16 +11,16 @@ import { cn } from '@/lib/utils'
 
 // ─── Color palette for convocatorias ──────────────────────────────────────────
 const CONVOCATORIA_COLORS = [
-  { bg: 'bg-blue-500/80',    border: 'border-blue-400',    text: 'text-blue-100',    dot: 'bg-blue-400',    badge: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
-  { bg: 'bg-violet-500/80',  border: 'border-violet-400',  text: 'text-violet-100',  dot: 'bg-violet-400',  badge: 'bg-violet-500/20 text-violet-300 border-violet-500/40' },
-  { bg: 'bg-emerald-500/80', border: 'border-emerald-400', text: 'text-emerald-100', dot: 'bg-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' },
-  { bg: 'bg-amber-500/80',   border: 'border-amber-400',   text: 'text-amber-100',   dot: 'bg-amber-400',   badge: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
-  { bg: 'bg-rose-500/80',    border: 'border-rose-400',    text: 'text-rose-100',    dot: 'bg-rose-400',    badge: 'bg-rose-500/20 text-rose-300 border-rose-500/40' },
-  { bg: 'bg-cyan-500/80',    border: 'border-cyan-400',    text: 'text-cyan-100',    dot: 'bg-cyan-400',    badge: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' },
-  { bg: 'bg-orange-500/80',  border: 'border-orange-400',  text: 'text-orange-100',  dot: 'bg-orange-400',  badge: 'bg-orange-500/20 text-orange-300 border-orange-500/40' },
-  { bg: 'bg-pink-500/80',    border: 'border-pink-400',    text: 'text-pink-100',    dot: 'bg-pink-400',    badge: 'bg-pink-500/20 text-pink-300 border-pink-500/40' },
-  { bg: 'bg-teal-500/80',    border: 'border-teal-400',    text: 'text-teal-100',    dot: 'bg-teal-400',    badge: 'bg-teal-500/20 text-teal-300 border-teal-500/40' },
-  { bg: 'bg-indigo-500/80',  border: 'border-indigo-400',  text: 'text-indigo-100',  dot: 'bg-indigo-400',  badge: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' },
+  { bg: 'bg-blue-500/80',    border: 'border-blue-400',    text: 'text-blue-100',    dot: 'bg-blue-400',    badge: 'bg-blue-500/20 text-blue-300 border-blue-500/40',    ring: 'bg-blue-400/40' },
+  { bg: 'bg-violet-500/80',  border: 'border-violet-400',  text: 'text-violet-100',  dot: 'bg-violet-400',  badge: 'bg-violet-500/20 text-violet-300 border-violet-500/40',  ring: 'bg-violet-400/40' },
+  { bg: 'bg-emerald-500/80', border: 'border-emerald-400', text: 'text-emerald-100', dot: 'bg-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', ring: 'bg-emerald-400/40' },
+  { bg: 'bg-amber-500/80',   border: 'border-amber-400',   text: 'text-amber-100',   dot: 'bg-amber-400',   badge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',   ring: 'bg-amber-400/40' },
+  { bg: 'bg-rose-500/80',    border: 'border-rose-400',    text: 'text-rose-100',    dot: 'bg-rose-400',    badge: 'bg-rose-500/20 text-rose-300 border-rose-500/40',    ring: 'bg-rose-400/40' },
+  { bg: 'bg-cyan-500/80',    border: 'border-cyan-400',    text: 'text-cyan-100',    dot: 'bg-cyan-400',    badge: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',    ring: 'bg-cyan-400/40' },
+  { bg: 'bg-orange-500/80',  border: 'border-orange-400',  text: 'text-orange-100',  dot: 'bg-orange-400',  badge: 'bg-orange-500/20 text-orange-300 border-orange-500/40',  ring: 'bg-orange-400/40' },
+  { bg: 'bg-pink-500/80',    border: 'border-pink-400',    text: 'text-pink-100',    dot: 'bg-pink-400',    badge: 'bg-pink-500/20 text-pink-300 border-pink-500/40',    ring: 'bg-pink-400/40' },
+  { bg: 'bg-teal-500/80',    border: 'border-teal-400',    text: 'text-teal-100',    dot: 'bg-teal-400',    badge: 'bg-teal-500/20 text-teal-300 border-teal-500/40',    ring: 'bg-teal-400/40' },
+  { bg: 'bg-indigo-500/80',  border: 'border-indigo-400',  text: 'text-indigo-100',  dot: 'bg-indigo-400',  badge: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',  ring: 'bg-indigo-400/40' },
 ]
 
 const MONTHS_ES = [
@@ -31,7 +31,8 @@ const DAYS_ES = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom']
 
 // ─── Date parsing ─────────────────────────────────────────────────────────────
 function parseEventDate(row: EventRow): Date | null {
-  const raw = row['Día'] ?? row['Día Mes'] ?? null
+  // Use || (not ??) so empty string also falls back to 'Día Mes'
+  const raw = row['Día'] || row['Día Mes'] || null
   if (!raw) return null
 
   // Try ISO YYYY-MM-DD (parse manually to avoid UTC timezone offset shifting the date)
@@ -66,6 +67,17 @@ function sameDay(a: Date, b: Date): boolean {
     a.getDate() === b.getDate()
 }
 
+// Parse time string "HH:MM" to minutes since midnight
+function parseTimeToMinutes(t: string | null | undefined): number | null {
+  if (!t) return null
+  const parts = t.split(':')
+  if (parts.length < 2) return null
+  const h = parseInt(parts[0])
+  const m = parseInt(parts[1])
+  if (isNaN(h) || isNaN(m)) return null
+  return h * 60 + m
+}
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 type ParsedEvent = EventRow & { _date: Date | null }
 type ViewMode = 'year' | 'month'
@@ -92,6 +104,9 @@ export default function CalendarPage() {
 
   // Selected event detail
   const [selectedEvent, setSelectedEvent] = useState<ParsedEvent | null>(null)
+
+  // Day view modal
+  const [dayViewDate, setDayViewDate] = useState<Date | null>(null)
 
   // Create event modal
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -172,6 +187,11 @@ export default function CalendarPage() {
     setCurrentDate(d)
   }
   const goToday = () => setCurrentDate(new Date())
+
+  // ── Day view ────────────────────────────────────────────────────────────────
+  const openDayView = (date: Date) => {
+    setDayViewDate(date)
+  }
 
   // ── Create event helpers ────────────────────────────────────────────────────
   const openCreate = (date?: Date) => {
@@ -396,7 +416,20 @@ export default function CalendarPage() {
           month={month}
           events={filteredEvents}
           colorMap={colorMap}
-          onDayClick={openCreate}
+          onDayClick={openDayView}
+          onCreateEvent={openCreate}
+          onEventClick={setSelectedEvent}
+        />
+      )}
+
+      {/* Day view modal */}
+      {dayViewDate && (
+        <DayViewModal
+          date={dayViewDate}
+          events={filteredEvents}
+          colorMap={colorMap}
+          onClose={() => setDayViewDate(null)}
+          onCreateEvent={(d) => { setDayViewDate(null); openCreate(d) }}
           onEventClick={setSelectedEvent}
         />
       )}
@@ -521,12 +554,13 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent }:
 }
 
 // ─── Month View ───────────────────────────────────────────────────────────────
-function MonthView({ year, month, events, colorMap, onDayClick, onEventClick }: {
+function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, onEventClick }: {
   year: number
   month: number
   events: ParsedEvent[]
   colorMap: Map<string, typeof CONVOCATORIA_COLORS[0]>
   onDayClick: (d: Date) => void
+  onCreateEvent: (d: Date) => void
   onEventClick: (e: ParsedEvent) => void
 }) {
   const today = new Date()
@@ -566,25 +600,34 @@ function MonthView({ year, month, events, colorMap, onDayClick, onEventClick }: 
             .filter(e => e._date && sameDay(e._date, date))
             .sort((a, b) => (a['Hora inicio'] ?? '').localeCompare(b['Hora inicio'] ?? ''))
 
+          // Color of first event for the circle highlight
+          const firstColor = dayEvents.length > 0
+            ? colorMap.get(dayEvents[0].Convocatoria ?? '')
+            : null
+
           return (
             <div
               key={i}
-              onDoubleClick={() => onDayClick(date)}
+              onClick={() => onDayClick(date)}
               className={cn(
-                'group min-h-28 border-b border-white/5 p-1.5 flex flex-col cursor-default',
+                'group min-h-28 border-b border-white/5 p-1.5 flex flex-col cursor-pointer',
                 isToday ? 'bg-brand-500/5' : 'hover:bg-white/[0.03]',
               )}
             >
               {/* Day number */}
               <div className="flex items-center justify-between mb-1">
                 <span className={cn(
-                  'w-6 h-6 flex items-center justify-center rounded-full text-xs font-medium',
-                  isToday ? 'bg-brand-500 text-white' : 'text-white/50'
+                  'w-7 h-7 flex items-center justify-center rounded-full text-xs font-medium relative overflow-hidden transition-all',
+                  isToday ? 'bg-brand-500 text-white' : (firstColor ? 'text-white/90' : 'text-white/50')
                 )}>
-                  {dayNum}
+                  {/* Colored circle background for days with events */}
+                  {!isToday && firstColor && (
+                    <span className={cn('absolute inset-0 rounded-full', firstColor.ring)} />
+                  )}
+                  <span className="relative z-10">{dayNum}</span>
                 </span>
                 <button
-                  onClick={() => onDayClick(date)}
+                  onClick={(e) => { e.stopPropagation(); onCreateEvent(date) }}
                   className="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded text-white/30 hover:text-white/70 hover:bg-white/10 transition-all"
                   title="Crear evento"
                 >
@@ -599,7 +642,7 @@ function MonthView({ year, month, events, colorMap, onDayClick, onEventClick }: 
                   return (
                     <button
                       key={ei}
-                      onClick={() => onEventClick(ev)}
+                      onClick={(e) => { e.stopPropagation(); onEventClick(ev) }}
                       className={cn(
                         'w-full text-left px-1.5 py-0.5 rounded text-[10px] leading-snug truncate border transition-all hover:opacity-80',
                         color ? `${color.bg} ${color.text} ${color.border}` : 'bg-white/10 text-white/60 border-white/20'
@@ -614,17 +657,207 @@ function MonthView({ year, month, events, colorMap, onDayClick, onEventClick }: 
                   )
                 })}
                 {dayEvents.length > 3 && (
-                  <button
-                    onClick={() => onDayClick(date)}
-                    className="text-[10px] text-white/30 hover:text-white/60 text-left px-1.5 transition-colors"
-                  >
+                  <span className="text-[10px] text-white/30 text-left px-1.5">
                     +{dayEvents.length - 3} más
-                  </button>
+                  </span>
                 )}
               </div>
             </div>
           )
         })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Day View Modal ───────────────────────────────────────────────────────────
+function DayViewModal({ date, events, colorMap, onClose, onCreateEvent, onEventClick }: {
+  date: Date
+  events: ParsedEvent[]
+  colorMap: Map<string, typeof CONVOCATORIA_COLORS[0]>
+  onClose: () => void
+  onCreateEvent: (d: Date) => void
+  onEventClick: (e: ParsedEvent) => void
+}) {
+  const dayEvents = events
+    .filter(e => e._date && sameDay(e._date, date))
+    .sort((a, b) => (a['Hora inicio'] ?? '').localeCompare(b['Hora inicio'] ?? ''))
+
+  // Unique convocatorias for this day (columns)
+  const dayConvocatorias = Array.from(
+    new Set(dayEvents.map(e => e.Convocatoria ?? '(Sin convocatoria)'))
+  )
+
+  // Hour range
+  const allMinutes = dayEvents.flatMap(e => [
+    parseTimeToMinutes(e['Hora inicio']),
+    parseTimeToMinutes(e['Hora fin']),
+  ]).filter((v): v is number => v !== null)
+
+  const minHour = allMinutes.length > 0 ? Math.max(0, Math.floor(Math.min(...allMinutes) / 60) - 1) : 8
+  const maxHour = allMinutes.length > 0 ? Math.min(23, Math.ceil(Math.max(...allMinutes) / 60) + 1) : 20
+
+  const hours = Array.from({ length: maxHour - minHour + 1 }, (_, i) => minHour + i)
+  const HOUR_HEIGHT = 64 // px per hour
+
+  const DAYS_FULL_ES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="relative glass-card w-full max-w-3xl max-h-[90vh] overflow-hidden animate-fade-in flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-white/10 flex-shrink-0">
+          <div>
+            <p className="text-white/40 text-xs uppercase tracking-wider">
+              {DAYS_FULL_ES[date.getDay()]}
+            </p>
+            <h2 className="text-white font-semibold text-xl">
+              {date.getDate()} {MONTHS_ES[date.getMonth()]} {date.getFullYear()}
+            </h2>
+            <p className="text-white/30 text-xs mt-0.5">
+              {dayEvents.length} evento{dayEvents.length !== 1 ? 's' : ''}
+              {dayConvocatorias.length > 0 && ` · ${dayConvocatorias.length} convocatoria${dayConvocatorias.length !== 1 ? 's' : ''}`}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onCreateEvent(date)}
+              className="btn-primary text-sm flex items-center gap-1.5 px-3 py-1.5"
+            >
+              <Plus className="w-3.5 h-3.5" /> Nuevo
+            </button>
+            <button onClick={onClose} className="text-white/50 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-all">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        {dayEvents.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-12 text-white/30 gap-3">
+            <CalendarDays className="w-10 h-10 opacity-30" />
+            <p className="text-sm">No hay eventos este día</p>
+            <button onClick={() => onCreateEvent(date)} className="btn-primary text-sm flex items-center gap-1.5 px-4 py-2 mt-2">
+              <Plus className="w-3.5 h-3.5" /> Crear evento
+            </button>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-auto">
+            <div className="flex min-h-full">
+              {/* Time axis */}
+              <div className="w-14 flex-shrink-0 border-r border-white/10 bg-white/[0.02]">
+                {/* Space for column headers */}
+                <div className="h-10" />
+                {hours.map(h => (
+                  <div key={h} className="relative border-t border-white/5" style={{ height: HOUR_HEIGHT }}>
+                    <span className="absolute top-1 right-2 text-white/25 text-[10px] font-mono">
+                      {String(h).padStart(2, '0')}:00
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Convocatoria columns */}
+              <div className="flex flex-1 min-w-0">
+                {dayConvocatorias.map(conv => {
+                  const color = colorMap.get(conv)
+                  const convEvents = dayEvents.filter(
+                    e => (e.Convocatoria ?? '(Sin convocatoria)') === conv
+                  )
+
+                  return (
+                    <div key={conv} className="flex-1 min-w-36 border-r border-white/5 last:border-r-0 flex flex-col">
+                      {/* Column header */}
+                      <div className={cn(
+                        'h-10 flex items-center gap-1.5 px-3 border-b border-white/10 flex-shrink-0 sticky top-0',
+                        color?.badge ?? 'bg-white/5 text-white/50 border-white/10'
+                      )}>
+                        <span className={cn('w-2 h-2 rounded-full flex-shrink-0', color?.dot ?? 'bg-white/30')} />
+                        <span className="text-[11px] font-medium truncate">{conv}</span>
+                        <span className="ml-auto text-[10px] opacity-60">{convEvents.length}</span>
+                      </div>
+
+                      {/* Time grid */}
+                      <div className="relative flex-1" style={{ height: hours.length * HOUR_HEIGHT }}>
+                        {/* Hour lines */}
+                        {hours.map((h, hi) => (
+                          <div
+                            key={h}
+                            className="absolute w-full border-t border-white/5"
+                            style={{ top: hi * HOUR_HEIGHT }}
+                          />
+                        ))}
+
+                        {/* Events */}
+                        {convEvents.map((ev, ei) => {
+                          const startMin = parseTimeToMinutes(ev['Hora inicio'])
+                          const endMin = parseTimeToMinutes(ev['Hora fin'])
+
+                          // Events without time: stack them at the top
+                          if (startMin === null) {
+                            return (
+                              <div
+                                key={ei}
+                                className={cn(
+                                  'mx-1 mb-1 rounded px-2 py-1 border cursor-pointer hover:opacity-90 transition-opacity',
+                                  color ? `${color.bg} ${color.border}` : 'bg-white/10 border-white/20'
+                                )}
+                                style={{ marginTop: ei * 40 }}
+                                onClick={() => onEventClick(ev)}
+                              >
+                                <div className={cn('text-[11px] font-medium truncate', color?.text ?? 'text-white/80')}>
+                                  {ev.Actividad || ev.Sesión || ev.CÓDIGO || '—'}
+                                </div>
+                                {ev.Sesión && ev.Actividad && (
+                                  <div className={cn('text-[10px] opacity-70 truncate', color?.text ?? 'text-white/60')}>
+                                    {ev.Sesión}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          }
+
+                          const top = (startMin - minHour * 60) / 60 * HOUR_HEIGHT
+                          const durationMin = endMin !== null ? endMin - startMin : 60
+                          const height = Math.max(24, durationMin / 60 * HOUR_HEIGHT)
+
+                          return (
+                            <div
+                              key={ei}
+                              className={cn(
+                                'absolute left-1 right-1 rounded px-2 py-1 border overflow-hidden cursor-pointer hover:opacity-90 transition-opacity',
+                                color ? `${color.bg} ${color.border}` : 'bg-white/10 border-white/20'
+                              )}
+                              style={{ top: top + 1, height: height - 2 }}
+                              onClick={() => onEventClick(ev)}
+                            >
+                              <div className={cn('text-[10px] font-medium leading-none mb-0.5 opacity-80', color?.text ?? 'text-white/60')}>
+                                {ev['Hora inicio']?.slice(0, 5)}
+                                {ev['Hora fin'] ? ` – ${ev['Hora fin'].slice(0, 5)}` : ''}
+                              </div>
+                              <div className={cn('text-[11px] font-medium leading-tight', color?.text ?? 'text-white/80')}>
+                                {ev.Actividad || ev.CÓDIGO || '—'}
+                              </div>
+                              {height > 44 && ev.Sesión && (
+                                <div className={cn('text-[10px] opacity-70 leading-tight truncate', color?.text ?? 'text-white/60')}>
+                                  {ev.Sesión}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
