@@ -491,7 +491,7 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent }:
           const date = new Date(year, month, dayNum)
           const isToday = sameDay(date, today)
           const dayEvents = monthEvents.filter(e => e._date && sameDay(e._date, date))
-          const colors = [...new Set(dayEvents.map(e => colorMap.get(e.Convocatoria ?? '')?.dot).filter(Boolean))] as string[]
+          const colors = Array.from(new Set(dayEvents.map(e => colorMap.get(e.Convocatoria ?? '')?.dot).filter(Boolean))) as string[]
 
           return (
             <button
