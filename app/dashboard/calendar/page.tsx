@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import {
   ChevronLeft, ChevronRight, Plus, X, Calendar, Filter,
   RefreshCw, Search, Clock, User, Tag, Hash, Layers, CalendarDays
@@ -693,25 +693,17 @@ function EventDetailModal({ event, colorMap, onClose }: {
   )
 }
 
-// ─── Create Event Modal ───────────────────────────────────────────────────────
-function CreateEventModal({ date, formData, convocatorias, tipos, saving, error, onUpdate, onSave, onClose }: {
-  date: Date | null
+// ─── InputRow (standalone to avoid hook rules issues) ────────────────────────
+function InputRow({ label, field, type = 'text', datalist, placeholder, formData, onUpdate }: {
+  label: string
+  field: keyof EventRow
+  type?: string
+  datalist?: string[]
+  placeholder?: string
   formData: Partial<EventRow>
-  convocatorias: string[]
-  tipos: string[]
-  saving: boolean
-  error: string | null
   onUpdate: (key: keyof EventRow, value: string) => void
-  onSave: () => void
-  onClose: () => void
 }) {
-  const InputRow = ({ label, field, type = 'text', datalist, placeholder }: {
-    label: string
-    field: keyof EventRow
-    type?: string
-    datalist?: string[]
-    placeholder?: string
-  }) => (
+  return (
     <div>
       <label className="text-white/40 text-xs mb-1 block">{label}</label>
       <div className="relative">
@@ -731,7 +723,20 @@ function CreateEventModal({ date, formData, convocatorias, tipos, saving, error,
       </div>
     </div>
   )
+}
 
+// ─── Create Event Modal ───────────────────────────────────────────────────────
+function CreateEventModal({ date, formData, convocatorias, tipos, saving, error, onUpdate, onSave, onClose }: {
+  date: Date | null
+  formData: Partial<EventRow>
+  convocatorias: string[]
+  tipos: string[]
+  saving: boolean
+  error: string | null
+  onUpdate: (key: keyof EventRow, value: string) => void
+  onSave: () => void
+  onClose: () => void
+}) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -762,8 +767,8 @@ function CreateEventModal({ date, formData, convocatorias, tipos, saving, error,
         {/* Form */}
         <div className="p-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <InputRow label="ID" field="ID" placeholder="Ej: EVT-001" />
-            <InputRow label="Código" field="CÓDIGO" placeholder="Ej: C-2024-01" />
+            <InputRow label="ID" field="ID" placeholder="Ej: EVT-001" formData={formData} onUpdate={onUpdate} />
+            <InputRow label="Código" field="CÓDIGO" placeholder="Ej: C-2024-01" formData={formData} onUpdate={onUpdate} />
           </div>
 
           <InputRow
@@ -771,37 +776,41 @@ function CreateEventModal({ date, formData, convocatorias, tipos, saving, error,
             field="Convocatoria"
             datalist={convocatorias}
             placeholder="Nombre de la convocatoria"
+            formData={formData}
+            onUpdate={onUpdate}
           />
 
-          <InputRow label="Actividad" field="Actividad" placeholder="Nombre de la actividad" />
-          <InputRow label="Sesión" field="Sesión" placeholder="Sesión o descripción" />
+          <InputRow label="Actividad" field="Actividad" placeholder="Nombre de la actividad" formData={formData} onUpdate={onUpdate} />
+          <InputRow label="Sesión" field="Sesión" placeholder="Sesión o descripción" formData={formData} onUpdate={onUpdate} />
 
           <InputRow
             label="Tipo"
             field="Tipo"
             datalist={tipos}
             placeholder="Tipo de evento"
+            formData={formData}
+            onUpdate={onUpdate}
           />
 
           <div className="grid grid-cols-2 gap-3">
-            <InputRow label="Día" field="Día" type="date" />
-            <InputRow label="Día Mes" field="Día Mes" placeholder="Ej: 15 Ene" />
+            <InputRow label="Día" field="Día" type="date" formData={formData} onUpdate={onUpdate} />
+            <InputRow label="Día Mes" field="Día Mes" placeholder="Ej: 15 Ene" formData={formData} onUpdate={onUpdate} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <InputRow label="Hora inicio" field="Hora inicio" type="time" />
-            <InputRow label="Hora fin" field="Hora fin" type="time" />
+            <InputRow label="Hora inicio" field="Hora inicio" type="time" formData={formData} onUpdate={onUpdate} />
+            <InputRow label="Hora fin" field="Hora fin" type="time" formData={formData} onUpdate={onUpdate} />
           </div>
 
-          <InputRow label="Calendar" field="Calendar" placeholder="Referencia de calendario" />
+          <InputRow label="Calendar" field="Calendar" placeholder="Referencia de calendario" formData={formData} onUpdate={onUpdate} />
 
           <div className="grid grid-cols-2 gap-3">
-            <InputRow label="Agente" field="Agente" placeholder="Agente principal" />
-            <InputRow label="Agente 2" field="Agente 2" placeholder="Agente 2" />
+            <InputRow label="Agente" field="Agente" placeholder="Agente principal" formData={formData} onUpdate={onUpdate} />
+            <InputRow label="Agente 2" field="Agente 2" placeholder="Agente 2" formData={formData} onUpdate={onUpdate} />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <InputRow label="Agente 3" field="Agente 3" placeholder="Agente 3" />
-            <InputRow label="Agente 4" field="Agente 4" placeholder="Agente 4" />
+            <InputRow label="Agente 3" field="Agente 3" placeholder="Agente 3" formData={formData} onUpdate={onUpdate} />
+            <InputRow label="Agente 4" field="Agente 4" placeholder="Agente 4" formData={formData} onUpdate={onUpdate} />
           </div>
 
           {error && (
