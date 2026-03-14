@@ -34,9 +34,9 @@ function parseEventDate(row: EventRow): Date | null {
   const raw = row['Día'] ?? row['Día Mes'] ?? null
   if (!raw) return null
 
-  // Try ISO format first
-  const iso = new Date(raw)
-  if (!isNaN(iso.getTime())) return iso
+  // Try ISO YYYY-MM-DD (parse manually to avoid UTC timezone offset shifting the date)
+  const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (isoMatch) return new Date(parseInt(isoMatch[1]), parseInt(isoMatch[2]) - 1, parseInt(isoMatch[3]))
 
   // Try DD/MM/YYYY
   const dmy = raw.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/)
@@ -569,8 +569,9 @@ function MonthView({ year, month, events, colorMap, onDayClick, onEventClick }: 
           return (
             <div
               key={i}
+              onDoubleClick={() => onDayClick(date)}
               className={cn(
-                'min-h-28 border-b border-white/5 p-1.5 flex flex-col',
+                'group min-h-28 border-b border-white/5 p-1.5 flex flex-col cursor-default',
                 isToday ? 'bg-brand-500/5' : 'hover:bg-white/[0.03]',
               )}
             >
@@ -584,7 +585,7 @@ function MonthView({ year, month, events, colorMap, onDayClick, onEventClick }: 
                 </span>
                 <button
                   onClick={() => onDayClick(date)}
-                  className="opacity-0 hover:opacity-100 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded text-white/30 hover:text-white/70 hover:bg-white/10 transition-all"
+                  className="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded text-white/30 hover:text-white/70 hover:bg-white/10 transition-all"
                   title="Crear evento"
                 >
                   <Plus className="w-3 h-3" />
