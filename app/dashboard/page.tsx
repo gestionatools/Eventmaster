@@ -1,63 +1,54 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Calendar, Users, TrendingUp, CheckCircle, Clock, MapPin, ArrowRight } from 'lucide-react'
+import { Calendar, Users, Hash, Layers, Clock, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { supabase, EventRow } from '@/lib/supabase'
 import StatCard from '@/components/StatCard'
-import StatusBadge from '@/components/StatusBadge'
 import TopBar from '@/components/TopBar'
-import { formatDate } from '@/lib/utils'
 
 interface DashboardStats {
-  totalEvents: number
-  upcomingEvents: number
-  totalAttendees: number
-  completedEvents: number
-}
-
-interface RecentEvent {
-  id: string
-  title: string
-  date: string
-  location: string | null
-  status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled'
-  category: string | null
-  attendee_count?: number
+  totalEventos: number
+  totalConvocatorias: number
+  totalAgentes: number
+  totalTipos: number
 }
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [recentEvents, setRecentEvents] = useState<RecentEvent[]>([])
+  const [recentEvents, setRecentEvents] = useState<EventRow[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
 
   const fetchData = useCallback(async () => {
     try {
-      const [eventsRes, attendeesRes] = await Promise.all([
-        supabase.from('events').select('*'),
-        supabase.from('attendees').select('*'),
-      ])
+      const { data, error } = await supabase
+        .from('eventmaster_main')
+        .select('*')
+        .order('ID', { ascending: false })
+        .limit(200)
 
-      const events = eventsRes.data || []
-      const attendees = attendeesRes.data || []
+      if (error) throw error
+
+      const rows: EventRow[] = data || []
+
+      const convocatorias = new Set(rows.map(r => r.Convocatoria).filter(Boolean))
+      const agentes = new Set([
+        ...rows.map(r => r.Agente),
+        ...rows.map(r => r['Agente 2']),
+        ...rows.map(r => r['Agente 3']),
+        ...rows.map(r => r['Agente 4']),
+      ].filter(Boolean))
+      const tipos = new Set(rows.map(r => r.Tipo).filter(Boolean))
 
       setStats({
-        totalEvents: events.length,
-        upcomingEvents: events.filter(e => e.status === 'upcoming' || e.status === 'ongoing').length,
-        totalAttendees: attendees.length,
-        completedEvents: events.filter(e => e.status === 'completed').length,
+        totalEventos: rows.length,
+        totalConvocatorias: convocatorias.size,
+        totalAgentes: agentes.size,
+        totalTipos: tipos.size,
       })
 
-      const recent = events
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 5)
-        .map(event => ({
-          ...event,
-          attendee_count: attendees.filter(a => a.event_id === event.id).length,
-        }))
-
-      setRecentEvents(recent)
+      setRecentEvents(rows.slice(0, 10))
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
     } finally {
@@ -79,7 +70,7 @@ export default function DashboardPage() {
     <div className="animate-fade-in">
       <TopBar
         title="Dashboard"
-        subtitle="Bienvenido a EventMaster"
+        subtitle="EventMaster"
         onRefresh={handleRefresh}
         isRefreshing={refreshing}
       />
@@ -88,29 +79,29 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
         <StatCard
           title="Total Eventos"
-          value={stats?.totalEvents ?? 0}
+          value={stats?.totalEventos ?? 0}
           icon={Calendar}
           color="blue"
           loading={loading}
         />
         <StatCard
-          title="Eventos Activos"
-          value={stats?.upcomingEvents ?? 0}
-          icon={Clock}
+          title="Convocatorias"
+          value={stats?.totalConvocatorias ?? 0}
+          icon={Layers}
           color="purple"
           loading={loading}
         />
         <StatCard
-          title="Total Asistentes"
-          value={stats?.totalAttendees ?? 0}
+          title="Agentes"
+          value={stats?.totalAgentes ?? 0}
           icon={Users}
           color="green"
           loading={loading}
         />
         <StatCard
-          title="Completados"
-          value={stats?.completedEvents ?? 0}
-          icon={CheckCircle}
+          title="Tipos"
+          value={stats?.totalTipos ?? 0}
+          icon={Hash}
           color="orange"
           loading={loading}
         />
@@ -121,10 +112,10 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-lg font-semibold text-white">Eventos Recientes</h2>
-            <p className="text-white/40 text-sm mt-0.5">Los últimos eventos registrados</p>
+            <p className="text-white/40 text-sm mt-0.5">Últimos registros de la base de datos</p>
           </div>
-          <Link href="/dashboard/events" className="btn-ghost flex items-center gap-2 text-sm">
-            Ver todos
+          <Link href="/dashboard/database" className="btn-ghost flex items-center gap-2 text-sm">
+            Ver base de datos
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -136,61 +127,60 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : recentEvents.length === 0 ? (
-          <EmptyState />
+          <div className="text-center py-16">
+            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Calendar className="w-8 h-8 text-white/20" />
+            </div>
+            <p className="text-white/50 text-lg font-medium">Sin datos</p>
+            <p className="text-white/30 text-sm mt-2">No se encontraron eventos en la base de datos</p>
+          </div>
         ) : (
           <div className="space-y-3">
             {recentEvents.map((event) => (
-              <Link key={event.id} href={`/dashboard/events/${event.id}`}>
-                <div className="glass-card-hover p-4 flex items-center gap-4 group">
-                  <div className="w-10 h-10 bg-gradient-to-br from-brand-500/30 to-accent-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Calendar className="w-5 h-5 text-brand-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium truncate group-hover:text-brand-300 transition-colors">
-                      {event.title}
-                    </p>
-                    <div className="flex items-center gap-3 mt-1">
+              <div key={event.ID} className="glass-card p-4 flex items-center gap-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-brand-500/30 to-accent-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Calendar className="w-5 h-5 text-brand-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-medium truncate">
+                    {event.Actividad || '—'}
+                  </p>
+                  <div className="flex items-center gap-3 mt-1 flex-wrap">
+                    {event.Convocatoria && (
+                      <span className="text-white/40 text-xs flex items-center gap-1">
+                        <Layers className="w-3 h-3" />
+                        {event.Convocatoria}
+                      </span>
+                    )}
+                    {event['Hora inicio'] && (
                       <span className="text-white/40 text-xs flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        {formatDate(event.date)}
+                        {event['Hora inicio']}{event['Hora fin'] ? ` – ${event['Hora fin']}` : ''}
                       </span>
-                      {event.location && (
-                        <span className="text-white/40 text-xs flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {event.location}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="hidden sm:flex items-center gap-1 text-white/40 text-xs">
-                      <Users className="w-3.5 h-3.5" />
-                      <span>{event.attendee_count}</span>
-                    </div>
-                    <StatusBadge status={event.status} />
+                    )}
+                    {event.Agente && (
+                      <span className="text-white/40 text-xs flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        {event.Agente}
+                      </span>
+                    )}
                   </div>
                 </div>
-              </Link>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {event.Tipo && (
+                    <span className="px-2.5 py-1 bg-brand-500/20 text-brand-300 text-xs rounded-lg border border-brand-500/30">
+                      {event.Tipo}
+                    </span>
+                  )}
+                  {event['Día Mes'] && (
+                    <span className="text-white/30 text-xs hidden sm:block">{event['Día Mes']}</span>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
         )}
       </div>
-    </div>
-  )
-}
-
-function EmptyState() {
-  return (
-    <div className="text-center py-16">
-      <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
-        <Calendar className="w-8 h-8 text-white/20" />
-      </div>
-      <p className="text-white/50 text-lg font-medium">No hay eventos aún</p>
-      <p className="text-white/30 text-sm mt-2">Crea tu primer evento para comenzar</p>
-      <Link href="/dashboard/events" className="btn-primary inline-flex items-center gap-2 mt-6 text-sm">
-        <TrendingUp className="w-4 h-4" />
-        Crear Evento
-      </Link>
     </div>
   )
 }

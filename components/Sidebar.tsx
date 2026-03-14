@@ -2,15 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Calendar, LayoutDashboard, Users, Database, Settings, Zap, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Database, Zap, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/events', label: 'Eventos', icon: Calendar },
-  { href: '/dashboard/attendees', label: 'Asistentes', icon: Users },
   { href: '/dashboard/database', label: 'Base de Datos', icon: Database },
-  { href: '/dashboard/settings', label: 'Configuración', icon: Settings },
 ]
 
 export default function Sidebar() {
@@ -57,19 +54,6 @@ export default function Sidebar() {
           )
         })}
       </nav>
-
-      {/* Footer */}
-      <div className="p-4 border-t border-white/10">
-        <div className="glass-card p-3 flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-accent-500 to-brand-500 rounded-lg flex items-center justify-center text-xs font-bold text-white">
-            EM
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-medium truncate">EventMaster</p>
-            <p className="text-white/40 text-xs truncate">Pro Plan</p>
-          </div>
-        </div>
-      </div>
     </aside>
   )
 }
