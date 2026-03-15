@@ -5,13 +5,14 @@ import {
   ChevronLeft, ChevronRight, Plus, X, Calendar, Filter,
   RefreshCw, Search, Clock, User, Tag, Hash, Layers, CalendarDays, Download, Trash2, Star
 } from 'lucide-react'
-import { supabase, EventRow } from '@/lib/supabase'
+import { supabase, EventRow, GestionaEventRow } from '@/lib/supabase'
 import TopBar from '@/components/TopBar'
 import { cn } from '@/lib/utils'
 import CreateConvocatoriaModal from './CreateConvocatoriaModal'
 import DeleteConvocatoriaModal from './DeleteConvocatoriaModal'
 import CalendarEventModal from './CalendarEventModal'
 import HolidaysModal from './HolidaysModal'
+import CreateGestionaEventModal from './CreateGestionaEventModal'
 
 // ─── Color palette for convocatorias ──────────────────────────────────────────
 const CONVOCATORIA_COLORS = [
@@ -98,6 +99,20 @@ function isTipoEspublico(tipo: string | null | undefined) {
 
 function isTipoGestiona(tipo: string | null | undefined) {
   return (tipo ?? '').toLowerCase().includes('gestiona')
+}
+
+// ─── Gestiona range check ────────────────────────────────────────────────────
+function isDateInGestionaRange(date: Date, gEvents: GestionaEventRow[]): boolean {
+  const day = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+  return gEvents.some(e => {
+    if (!e.fechainicio) return false
+    const s = new Date(e.fechainicio)
+    const startDay = new Date(s.getFullYear(), s.getMonth(), s.getDate()).getTime()
+    const endDay = e.fechafin
+      ? (() => { const d = new Date(e.fechafin!); return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() })()
+      : startDay
+    return day >= startDay && day <= endDay
+  })
 }
 
 // ─── Date parsing ─────────────────────────────────────────────────────────────
@@ -284,6 +299,10 @@ export default function CalendarPage() {
   const [showCalendarEventModal, setShowCalendarEventModal]         = useState(false)
   const [showDeleteConvocatoria, setShowDeleteConvocatoria]         = useState(false)
   const [showHolidaysModal, setShowHolidaysModal]                   = useState(false)
+  const [showCreateGestionaModal, setShowCreateGestionaModal]       = useState(false)
+
+  // Gestiona events (events_Gestiona table)
+  const [gestionaEvents, setGestionaEvents] = useState<GestionaEventRow[]>([])
 
   // ── Fetch data ──────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -305,6 +324,10 @@ export default function CalendarPage() {
         from += PAGE_SIZE
       }
       setEvents(all.map(r => ({ ...r, _date: parseEventDate(r) })))
+
+      // Fetch Gestiona events
+      const { data: gData } = await supabase.from('events_Gestiona').select('*')
+      setGestionaEvents((gData || []) as GestionaEventRow[])
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -547,6 +570,18 @@ export default function CalendarPage() {
           <Star className="w-4 h-4" /> Días festivos
         </button>
 
+        {/* Create Gestiona event */}
+        <button
+          onClick={() => setShowCreateGestionaModal(true)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 transition-all"
+        >
+          <span
+            className="w-3.5 h-3.5 bg-red-300"
+            style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)', display: 'inline-block' }}
+          />
+          Crear Evento Gestiona
+        </button>
+
         {/* Create convocatoria – Calendar modal */}
         <button
           onClick={() => setShowCalendarEventModal(true)}
@@ -688,6 +723,7 @@ export default function CalendarPage() {
           onDayClick={openDayView}
           onCreateEvent={openCreate}
           customMonths={crossYearRange ?? undefined}
+          gestionaEvents={gestionaEvents}
         />
       ) : (
         <MonthView
@@ -697,6 +733,7 @@ export default function CalendarPage() {
           colorMap={colorMap}
           onDayClick={openDayView}
           onCreateEvent={openCreate}
+          gestionaEvents={gestionaEvents}
           onEventClick={setSelectedEvent}
         />
       )}
@@ -773,18 +810,27 @@ export default function CalendarPage() {
           onSuccess={() => fetchData()}
         />
       )}
+
+      {/* Create Gestiona event modal */}
+      {showCreateGestionaModal && (
+        <CreateGestionaEventModal
+          onClose={() => setShowCreateGestionaModal(false)}
+          onSuccess={() => fetchData()}
+        />
+      )}
     </div>
   )
 }
 
 // ─── Year View ────────────────────────────────────────────────────────────────
-function YearView({ year, events, colorMap, onDayClick, onCreateEvent, customMonths }: {
+function YearView({ year, events, colorMap, onDayClick, onCreateEvent, customMonths, gestionaEvents }: {
   year: number
   events: ParsedEvent[]
   colorMap: Map<string, typeof CONVOCATORIA_COLORS[0]>
   onDayClick: (d: Date) => void
   onCreateEvent: (d: Date) => void
   customMonths?: MonthSpec[]
+  gestionaEvents: GestionaEventRow[]
 }) {
   const months: MonthSpec[] = customMonths ?? Array.from({ length: 12 }, (_, mi) => ({ year, month: mi }))
   const showYear = customMonths != null && customMonths.some(m => m.year !== customMonths[0].year)
@@ -801,13 +847,14 @@ function YearView({ year, events, colorMap, onDayClick, onCreateEvent, customMon
           onDayClick={onDayClick}
           onCreateEvent={onCreateEvent}
           showYear={showYear}
+          gestionaEvents={gestionaEvents}
         />
       ))}
     </div>
   )
 }
 
-function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, showYear }: {
+function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, showYear, gestionaEvents }: {
   year: number
   month: number
   events: ParsedEvent[]
@@ -815,6 +862,7 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
   onDayClick: (d: Date) => void
   onCreateEvent: (d: Date) => void
   showYear?: boolean
+  gestionaEvents: GestionaEventRow[]
 }) {
   const today = new Date()
   const firstDay = new Date(year, month, 1)
@@ -859,6 +907,7 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
           const hasGestiona   = !!firstGestiona
           const hasPresencial = !!firstPresencial
           const presencialStyle = firstPresencial ? getPresencialStyle(firstPresencial.Convocatoria) : null
+          const hasGestionaRange = isDateInGestionaRange(date, gestionaEvents)
 
           return (
             <button
@@ -881,6 +930,13 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
                           : 'text-white/50'
               )}
             >
+              {/* Gestiona range: red hexagon overlay superimposed on the day */}
+              {hasGestionaRange && (
+                <span
+                  className="absolute inset-0 bg-red-500/30 pointer-events-none z-20"
+                  style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                />
+              )}
               {/* Day number with shape indicators */}
               <span className="relative flex items-center justify-center w-5 h-5">
                 {!isToday && hasFestivo && (
@@ -929,7 +985,7 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
 }
 
 // ─── Month View ───────────────────────────────────────────────────────────────
-function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, onEventClick }: {
+function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, onEventClick, gestionaEvents }: {
   year: number
   month: number
   events: ParsedEvent[]
@@ -937,6 +993,7 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
   onDayClick: (d: Date) => void
   onCreateEvent: (d: Date) => void
   onEventClick: (e: ParsedEvent) => void
+  gestionaEvents: GestionaEventRow[]
 }) {
   const today = new Date()
   const firstDay = new Date(year, month, 1)
@@ -989,13 +1046,14 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
           const hasPresencial = !!firstPresencial
           const presencialStyle = firstPresencial ? getPresencialStyle(firstPresencial.Convocatoria) : null
           const nonFestivoEvents = dayEvents.filter(e => !isTipoFestivo(e.Tipo))
+          const hasGestionaRange = isDateInGestionaRange(date, gestionaEvents)
 
           return (
             <div
               key={i}
               onClick={() => onDayClick(date)}
               className={cn(
-                'group min-h-28 border-b border-white/5 p-1.5 flex flex-col cursor-pointer',
+                'group min-h-28 border-b border-white/5 p-1.5 flex flex-col cursor-pointer relative overflow-hidden',
                 isToday
                   ? 'bg-brand-500/5'
                   : hasFestivo
@@ -1009,6 +1067,14 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                           : 'hover:bg-white/[0.03]',
               )}
             >
+              {/* Gestiona range: red hexagon overlay superimposed on the day cell */}
+              {hasGestionaRange && (
+                <span
+                  className="absolute inset-0 bg-red-500/20 pointer-events-none z-10"
+                  style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                />
+              )}
+
               {/* Day number */}
               <div className="flex items-center justify-between mb-1">
                 <span className={cn(
