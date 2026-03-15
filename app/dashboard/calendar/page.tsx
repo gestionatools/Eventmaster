@@ -319,6 +319,8 @@ export default function CalendarPage() {
 
   const filteredEvents = useMemo(() => {
     return events.filter(e => {
+      // Festivos always shown regardless of filters
+      if (isTipoFestivo(e.Tipo)) return true
       if (filterConvocatoria.length > 0 && !filterConvocatoria.includes(e.Convocatoria ?? '')) return false
       if (filterTipo && e.Tipo !== filterTipo) return false
       if (filterCodigo) {
@@ -380,6 +382,16 @@ export default function CalendarPage() {
     const isoDate = d.toISOString().split('T')[0]
     const dayMes  = `${d.getDate()} ${MONTHS_ES[d.getMonth()].substring(0, 3)}`
     setFormData({ ...EMPTY_FORM, Día: isoDate, 'Día Mes': dayMes })
+    setSaveError(null)
+    setShowCreateModal(true)
+  }
+
+  const openCreatePresencial = (date?: Date) => {
+    const d = date ?? new Date()
+    setCreateDate(d)
+    const isoDate = d.toISOString().split('T')[0]
+    const dayMes  = `${d.getDate()} ${MONTHS_ES[d.getMonth()].substring(0, 3)}`
+    setFormData({ ...EMPTY_FORM, Día: isoDate, 'Día Mes': dayMes, Tipo: 'Presencial' })
     setSaveError(null)
     setShowCreateModal(true)
   }
@@ -530,6 +542,17 @@ export default function CalendarPage() {
           className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all"
         >
           <Calendar className="w-4 h-4" /> Crear convocatoria
+        </button>
+
+        {/* Create presencial event */}
+        <button
+          onClick={() => openCreatePresencial()}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-orange-500/20 text-orange-300 border border-orange-500/40 hover:bg-orange-500/30 transition-all"
+        >
+          <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2 L22 7 L22 17 L12 22 L2 17 L2 7 Z" />
+          </svg>
+          Evento Presencial
         </button>
 
         {/* Create event */}
@@ -846,7 +869,7 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
                 isToday
                   ? 'bg-brand-500/30 text-brand-300 font-bold'
                   : hasFestivo
-                    ? `font-semibold ${FESTIVO_STYLE.cell}`
+                    ? 'font-semibold text-red-200'
                     : hasEspublico
                       ? `font-semibold ${ESPUBLICO_STYLE.cell}`
                       : hasPresencial
@@ -854,16 +877,27 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
                         : 'text-white/50'
               )}
             >
-              <span className="text-[10px] leading-none">{dayNum}</span>
-              {/* Color indicators row */}
-              <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center max-w-full">
-                {hasFestivo && (
+              {/* Day number with shape indicators */}
+              <span className="relative flex items-center justify-center w-5 h-5">
+                {!isToday && hasFestivo && (
+                  <span className={cn('absolute inset-0 rounded-full', FESTIVO_STYLE.circle)} />
+                )}
+                {!isToday && hasEspublico && !hasFestivo && (
                   <span
-                    className="w-1.5 h-1.5 bg-red-400"
+                    className={cn('absolute inset-0', ESPUBLICO_STYLE.color)}
                     style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
-                    title="Festivo"
                   />
                 )}
+                {!isToday && hasPresencial && !hasFestivo && !hasEspublico && (
+                  <span
+                    className={cn('absolute inset-0', presencialStyle!.circle.split(' ')[0])}
+                    style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                  />
+                )}
+                <span className="relative z-10 text-[10px] leading-none">{dayNum}</span>
+              </span>
+              {/* Color indicators row (no dot for festivos) */}
+              <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center max-w-full">
                 {hasEspublico && (
                   <span
                     className="w-1.5 h-1.5 bg-purple-400"
@@ -963,8 +997,8 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
               <div className="flex items-center justify-between mb-1">
                 <span className={cn(
                   'w-7 h-7 flex items-center justify-center text-xs font-medium relative transition-all',
-                  // Use hexagon shape for espublico (no rounded-full/overflow-hidden so clip-path works)
-                  (!isToday && hasEspublico && !hasFestivo)
+                  // Use hexagon shape for espublico and presencial (no rounded-full/overflow-hidden so clip-path works)
+                  (!isToday && (hasEspublico || hasPresencial) && !hasFestivo)
                     ? 'rounded overflow-visible'
                     : 'rounded-full overflow-hidden',
                   isToday
@@ -988,9 +1022,12 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                       style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                     />
                   )}
-                  {/* Presencial: colored ring based on type */}
+                  {/* Presencial: hexagon shape based on type */}
                   {!isToday && hasPresencial && !hasFestivo && !hasEspublico && (
-                    <span className={cn('absolute inset-0 rounded-full', presencialStyle!.circle)} />
+                    <span
+                      className={cn('absolute inset-0', presencialStyle!.circle.split(' ')[0])}
+                      style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                    />
                   )}
                   {/* Regular event: subtle color ring */}
                   {!isToday && !hasPresencial && !hasFestivo && !hasEspublico && firstColor && (
