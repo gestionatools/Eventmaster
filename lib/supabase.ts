@@ -23,6 +23,15 @@ export type EventRow = {
   'Agente 4': string | null
 }
 
+export type GestionaEventRow = {
+  id: number
+  created_at: string
+  nombre: string | null
+  fechainicio: string | null
+  fechafin: string | null
+  emplazamiento: string | null
+}
+
 export type Database = {
   public: {
     Tables: {
