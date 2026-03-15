@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import {
   ChevronLeft, ChevronRight, Plus, X, Calendar, Filter,
-  RefreshCw, Search, Clock, User, Tag, Hash, Layers, CalendarDays, Download, Trash2
+  RefreshCw, Search, Clock, User, Tag, Hash, Layers, CalendarDays, Download, Trash2, Star
 } from 'lucide-react'
 import { supabase, EventRow } from '@/lib/supabase'
 import TopBar from '@/components/TopBar'
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import CreateConvocatoriaModal from './CreateConvocatoriaModal'
 import DeleteConvocatoriaModal from './DeleteConvocatoriaModal'
 import CalendarEventModal from './CalendarEventModal'
+import HolidaysModal from './HolidaysModal'
 
 // ─── Color palette for convocatorias ──────────────────────────────────────────
 const CONVOCATORIA_COLORS = [
@@ -64,6 +65,28 @@ const PRESENCIAL_STYLES: Record<ConvocatoriaType, { cell: string; circle: string
 
 function getPresencialStyle(convocatoria: string | null | undefined) {
   return PRESENCIAL_STYLES[getConvocatoriaType(convocatoria)]
+}
+
+// Festivo highlight style (red – characteristic holiday color)
+const FESTIVO_STYLE = {
+  cell: 'bg-red-500/25 text-red-200 ring-1 ring-red-500/60',
+  circle: 'bg-red-500/90 ring-2 ring-red-400',
+  ring: 'bg-red-500/5',
+}
+
+// Espublico highlight style (purple + hexagon indicator)
+const ESPUBLICO_STYLE = {
+  cell: 'bg-purple-500/20 text-purple-200',
+  color: 'bg-purple-500/80',
+  ring: 'bg-purple-500/5',
+}
+
+function isTipoFestivo(tipo: string | null | undefined) {
+  return (tipo ?? '').toLowerCase() === 'festivo'
+}
+
+function isTipoEspublico(tipo: string | null | undefined) {
+  return (tipo ?? '').toLowerCase() === 'espublico'
 }
 
 // ─── Date parsing ─────────────────────────────────────────────────────────────
@@ -249,6 +272,7 @@ export default function CalendarPage() {
   const [showCreateConvocatoria, setShowCreateConvocatoria]         = useState(false)
   const [showCalendarEventModal, setShowCalendarEventModal]         = useState(false)
   const [showDeleteConvocatoria, setShowDeleteConvocatoria]         = useState(false)
+  const [showHolidaysModal, setShowHolidaysModal]                   = useState(false)
 
   // ── Fetch data ──────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -492,6 +516,14 @@ export default function CalendarPage() {
           <CalendarDays className="w-4 h-4" /> Importar Excel
         </button>
 
+        {/* Días festivos */}
+        <button
+          onClick={() => setShowHolidaysModal(true)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 transition-all"
+        >
+          <Star className="w-4 h-4" /> Días festivos
+        </button>
+
         {/* Create convocatoria – Calendar modal */}
         <button
           onClick={() => setShowCalendarEventModal(true)}
@@ -709,6 +741,15 @@ export default function CalendarPage() {
           onSuccess={() => { fetchData(); setFilterConvocatoria([]) }}
         />
       )}
+
+      {/* Holidays modal */}
+      {showHolidaysModal && (
+        <HolidaysModal
+          initialYear={year}
+          onClose={() => setShowHolidaysModal(false)}
+          onSuccess={() => fetchData()}
+        />
+      )}
     </div>
   )
 }
@@ -786,7 +827,11 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
           const isToday = sameDay(date, today)
           const dayEvents = monthEvents.filter(e => e._date && sameDay(e._date, date))
           const colors = Array.from(new Set(dayEvents.map(e => colorMap.get(e.Convocatoria ?? '')?.dot).filter(Boolean))) as string[]
+          const firstFestivo   = dayEvents.find(e => isTipoFestivo(e.Tipo))
+          const firstEspublico = dayEvents.find(e => isTipoEspublico(e.Tipo))
           const firstPresencial = dayEvents.find(e => (e.Tipo ?? '').toLowerCase().includes('presencial'))
+          const hasFestivo    = !!firstFestivo
+          const hasEspublico  = !!firstEspublico
           const hasPresencial = !!firstPresencial
           const presencialStyle = firstPresencial ? getPresencialStyle(firstPresencial.Convocatoria) : null
 
@@ -800,19 +845,36 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
                 'aspect-square rounded flex flex-col items-center justify-center relative transition-all hover:bg-white/10 group',
                 isToday
                   ? 'bg-brand-500/30 text-brand-300 font-bold'
-                  : hasPresencial
-                    ? `font-semibold ${presencialStyle!.cell}`
-                    : 'text-white/50'
+                  : hasFestivo
+                    ? `font-semibold ${FESTIVO_STYLE.cell}`
+                    : hasEspublico
+                      ? `font-semibold ${ESPUBLICO_STYLE.cell}`
+                      : hasPresencial
+                        ? `font-semibold ${presencialStyle!.cell}`
+                        : 'text-white/50'
               )}
             >
               <span className="text-[10px] leading-none">{dayNum}</span>
-              {colors.length > 0 && (
-                <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center max-w-full">
-                  {colors.slice(0, 3).map((c, ci) => (
-                    <span key={ci} className={cn('w-1.5 h-1.5 rounded-full', c)} />
-                  ))}
-                </div>
-              )}
+              {/* Color indicators row */}
+              <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center max-w-full">
+                {hasFestivo && (
+                  <span
+                    className="w-1.5 h-1.5 bg-red-400"
+                    style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                    title="Festivo"
+                  />
+                )}
+                {hasEspublico && (
+                  <span
+                    className="w-1.5 h-1.5 bg-purple-400"
+                    style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                    title="Espublico"
+                  />
+                )}
+                {colors.slice(0, 3).map((c, ci) => (
+                  <span key={ci} className={cn('w-1.5 h-1.5 rounded-full', c)} />
+                ))}
+              </div>
             </button>
           )
         })}
@@ -872,7 +934,11 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
           const firstColor = dayEvents.length > 0
             ? colorMap.get(dayEvents[0].Convocatoria ?? '')
             : null
+          const firstFestivo   = dayEvents.find(e => isTipoFestivo(e.Tipo))
+          const firstEspublico = dayEvents.find(e => isTipoEspublico(e.Tipo))
           const firstPresencial = dayEvents.find(e => (e.Tipo ?? '').toLowerCase().includes('presencial'))
+          const hasFestivo    = !!firstFestivo
+          const hasEspublico  = !!firstEspublico
           const hasPresencial = !!firstPresencial
           const presencialStyle = firstPresencial ? getPresencialStyle(firstPresencial.Convocatoria) : null
 
@@ -882,25 +948,52 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
               onClick={() => onDayClick(date)}
               className={cn(
                 'group min-h-28 border-b border-white/5 p-1.5 flex flex-col cursor-pointer',
-                isToday ? 'bg-brand-500/5' : hasPresencial ? presencialStyle!.ring : 'hover:bg-white/[0.03]',
+                isToday
+                  ? 'bg-brand-500/5'
+                  : hasFestivo
+                    ? FESTIVO_STYLE.ring
+                    : hasEspublico
+                      ? ESPUBLICO_STYLE.ring
+                      : hasPresencial
+                        ? presencialStyle!.ring
+                        : 'hover:bg-white/[0.03]',
               )}
             >
               {/* Day number */}
               <div className="flex items-center justify-between mb-1">
                 <span className={cn(
-                  'w-7 h-7 flex items-center justify-center rounded-full text-xs font-medium relative overflow-hidden transition-all',
+                  'w-7 h-7 flex items-center justify-center text-xs font-medium relative transition-all',
+                  // Use hexagon shape for espublico (no rounded-full/overflow-hidden so clip-path works)
+                  (!isToday && hasEspublico && !hasFestivo)
+                    ? 'rounded overflow-visible'
+                    : 'rounded-full overflow-hidden',
                   isToday
                     ? 'bg-brand-500 text-white'
-                    : hasPresencial
+                    : hasFestivo
                       ? 'text-white'
-                      : (firstColor ? 'text-white/90' : 'text-white/50')
+                      : hasEspublico
+                        ? 'text-white'
+                        : hasPresencial
+                          ? 'text-white'
+                          : (firstColor ? 'text-white/90' : 'text-white/50')
                 )}>
+                  {/* Festivo: red filled circle */}
+                  {!isToday && hasFestivo && (
+                    <span className={cn('absolute inset-0 rounded-full', FESTIVO_STYLE.circle)} />
+                  )}
+                  {/* Espublico: purple hexagon */}
+                  {!isToday && hasEspublico && !hasFestivo && (
+                    <span
+                      className={cn('absolute inset-0', ESPUBLICO_STYLE.color)}
+                      style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                    />
+                  )}
                   {/* Presencial: colored ring based on type */}
-                  {!isToday && hasPresencial && (
+                  {!isToday && hasPresencial && !hasFestivo && !hasEspublico && (
                     <span className={cn('absolute inset-0 rounded-full', presencialStyle!.circle)} />
                   )}
                   {/* Regular event: subtle color ring */}
-                  {!isToday && !hasPresencial && firstColor && (
+                  {!isToday && !hasPresencial && !hasFestivo && !hasEspublico && firstColor && (
                     <span className={cn('absolute inset-0 rounded-full', firstColor.ring)} />
                   )}
                   <span className="relative z-10">{dayNum}</span>
@@ -918,17 +1011,31 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
               <div className="flex flex-col gap-0.5 flex-1">
                 {dayEvents.slice(0, 3).map((ev, ei) => {
                   const color = colorMap.get(ev.Convocatoria ?? '')
+                  const evFestivo   = isTipoFestivo(ev.Tipo)
+                  const evEspublico = isTipoEspublico(ev.Tipo)
                   return (
                     <button
                       key={ei}
                       onClick={(e) => { e.stopPropagation(); onEventClick(ev) }}
                       className={cn(
-                        'w-full text-left px-1.5 py-0.5 rounded text-[10px] leading-snug truncate border transition-all hover:opacity-80',
-                        color ? `${color.bg} ${color.text} ${color.border}` : 'bg-white/10 text-white/60 border-white/20'
+                        'w-full text-left px-1.5 py-0.5 rounded text-[10px] leading-snug truncate border transition-all hover:opacity-80 flex items-center gap-1',
+                        evFestivo
+                          ? 'bg-red-500/20 text-red-200 border-red-500/40'
+                          : evEspublico
+                            ? 'bg-purple-500/20 text-purple-200 border-purple-500/40'
+                            : color
+                              ? `${color.bg} ${color.text} ${color.border}`
+                              : 'bg-white/10 text-white/60 border-white/20'
                       )}
                       title={ev.Actividad ?? ev.Convocatoria ?? ''}
                     >
-                      {ev['Hora inicio'] && (
+                      {evEspublico && (
+                        <span
+                          className="w-1.5 h-1.5 bg-purple-300 flex-shrink-0"
+                          style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                        />
+                      )}
+                      {ev['Hora inicio'] && !evFestivo && !evEspublico && (
                         <span className="opacity-70 mr-1">{ev['Hora inicio'].slice(0, 5)}</span>
                       )}
                       {ev.Actividad || ev.Convocatoria || ev.CÓDIGO}
@@ -1078,20 +1185,40 @@ function DayViewModal({ date, events, colorMap, onClose, onCreateEvent, onEventC
 
                           // Events without time: stack them at the top
                           if (startMin === null) {
+                            const evFestivo   = isTipoFestivo(ev.Tipo)
+                            const evEspublico = isTipoEspublico(ev.Tipo)
                             return (
                               <div
                                 key={ei}
                                 className={cn(
-                                  'mx-1 mb-1 rounded px-2 py-1 border cursor-pointer hover:opacity-90 transition-opacity',
-                                  color ? `${color.bg} ${color.border}` : 'bg-white/10 border-white/20'
+                                  'mx-1 mb-1 rounded px-2 py-1 border cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-1.5',
+                                  evFestivo
+                                    ? 'bg-red-500/20 border-red-500/40'
+                                    : evEspublico
+                                      ? 'bg-purple-500/20 border-purple-500/40'
+                                      : color
+                                        ? `${color.bg} ${color.border}`
+                                        : 'bg-white/10 border-white/20'
                                 )}
                                 style={{ marginTop: ei * 40 }}
                                 onClick={() => onEventClick(ev)}
                               >
-                                <div className={cn('text-[11px] font-medium truncate', color?.text ?? 'text-white/80')}>
+                                {evFestivo && (
+                                  <Star className="w-3 h-3 text-red-400 flex-shrink-0" />
+                                )}
+                                {evEspublico && (
+                                  <span
+                                    className="w-2 h-2 bg-purple-300 flex-shrink-0"
+                                    style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                                  />
+                                )}
+                                <div className={cn(
+                                  'text-[11px] font-medium truncate',
+                                  evFestivo ? 'text-red-200' : evEspublico ? 'text-purple-200' : (color?.text ?? 'text-white/80')
+                                )}>
                                   {ev.Actividad || ev.Sesión || ev.CÓDIGO || '—'}
                                 </div>
-                                {ev.Sesión && ev.Actividad && (
+                                {ev.Sesión && ev.Actividad && !evFestivo && !evEspublico && (
                                   <div className={cn('text-[10px] opacity-70 truncate', color?.text ?? 'text-white/60')}>
                                     {ev.Sesión}
                                   </div>
