@@ -81,12 +81,23 @@ const ESPUBLICO_STYLE = {
   ring: 'bg-purple-500/5',
 }
 
+// Gestiona highlight style (teal + hexagon indicator, all-day event)
+const GESTIONA_STYLE = {
+  cell: 'bg-teal-500/20 text-teal-200 ring-1 ring-teal-500/60',
+  color: 'bg-teal-500/80',
+  ring: 'bg-teal-500/5',
+}
+
 function isTipoFestivo(tipo: string | null | undefined) {
   return (tipo ?? '').toLowerCase() === 'festivo'
 }
 
 function isTipoEspublico(tipo: string | null | undefined) {
   return (tipo ?? '').toLowerCase() === 'espublico'
+}
+
+function isTipoGestiona(tipo: string | null | undefined) {
+  return (tipo ?? '').toLowerCase().includes('gestiona')
 }
 
 // ─── Date parsing ─────────────────────────────────────────────────────────────
@@ -850,11 +861,13 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
           const isToday = sameDay(date, today)
           const dayEvents = monthEvents.filter(e => e._date && sameDay(e._date, date))
           const colors = Array.from(new Set(dayEvents.map(e => colorMap.get(e.Convocatoria ?? '')?.dot).filter(Boolean))) as string[]
-          const firstFestivo   = dayEvents.find(e => isTipoFestivo(e.Tipo))
-          const firstEspublico = dayEvents.find(e => isTipoEspublico(e.Tipo))
+          const firstFestivo    = dayEvents.find(e => isTipoFestivo(e.Tipo))
+          const firstEspublico  = dayEvents.find(e => isTipoEspublico(e.Tipo))
+          const firstGestiona   = dayEvents.find(e => isTipoGestiona(e.Tipo))
           const firstPresencial = dayEvents.find(e => (e.Tipo ?? '').toLowerCase().includes('presencial'))
           const hasFestivo    = !!firstFestivo
           const hasEspublico  = !!firstEspublico
+          const hasGestiona   = !!firstGestiona
           const hasPresencial = !!firstPresencial
           const presencialStyle = firstPresencial ? getPresencialStyle(firstPresencial.Convocatoria) : null
 
@@ -872,9 +885,11 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
                     ? 'font-semibold text-red-200'
                     : hasEspublico
                       ? `font-semibold ${ESPUBLICO_STYLE.cell}`
-                      : hasPresencial
-                        ? `font-semibold ${presencialStyle!.cell}`
-                        : 'text-white/50'
+                      : hasGestiona
+                        ? `font-semibold ${GESTIONA_STYLE.cell}`
+                        : hasPresencial
+                          ? `font-semibold ${presencialStyle!.cell}`
+                          : 'text-white/50'
               )}
             >
               {/* Day number with shape indicators */}
@@ -888,11 +903,14 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
                     style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                   />
                 )}
-                {!isToday && hasPresencial && !hasFestivo && !hasEspublico && (
+                {!isToday && hasGestiona && !hasFestivo && !hasEspublico && (
                   <span
-                    className={cn('absolute inset-0', presencialStyle!.circle.split(' ')[0])}
+                    className={cn('absolute inset-0', GESTIONA_STYLE.color)}
                     style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                   />
+                )}
+                {!isToday && hasPresencial && !hasFestivo && !hasEspublico && !hasGestiona && (
+                  <span className={cn('absolute inset-0 rounded-full', presencialStyle!.circle.split(' ')[0])} />
                 )}
                 <span className="relative z-10 text-[10px] leading-none">{dayNum}</span>
               </span>
@@ -903,6 +921,13 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
                     className="w-1.5 h-1.5 bg-purple-400"
                     style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                     title="Espublico"
+                  />
+                )}
+                {hasGestiona && !hasEspublico && (
+                  <span
+                    className="w-1.5 h-1.5 bg-teal-400"
+                    style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                    title="Gestiona"
                   />
                 )}
                 {colors.slice(0, 3).map((c, ci) => (
@@ -968,11 +993,13 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
           const firstColor = dayEvents.length > 0
             ? colorMap.get(dayEvents[0].Convocatoria ?? '')
             : null
-          const firstFestivo   = dayEvents.find(e => isTipoFestivo(e.Tipo))
-          const firstEspublico = dayEvents.find(e => isTipoEspublico(e.Tipo))
+          const firstFestivo    = dayEvents.find(e => isTipoFestivo(e.Tipo))
+          const firstEspublico  = dayEvents.find(e => isTipoEspublico(e.Tipo))
+          const firstGestiona   = dayEvents.find(e => isTipoGestiona(e.Tipo))
           const firstPresencial = dayEvents.find(e => (e.Tipo ?? '').toLowerCase().includes('presencial'))
           const hasFestivo    = !!firstFestivo
           const hasEspublico  = !!firstEspublico
+          const hasGestiona   = !!firstGestiona
           const hasPresencial = !!firstPresencial
           const presencialStyle = firstPresencial ? getPresencialStyle(firstPresencial.Convocatoria) : null
 
@@ -988,17 +1015,19 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                     ? FESTIVO_STYLE.ring
                     : hasEspublico
                       ? ESPUBLICO_STYLE.ring
-                      : hasPresencial
-                        ? presencialStyle!.ring
-                        : 'hover:bg-white/[0.03]',
+                      : hasGestiona
+                        ? GESTIONA_STYLE.ring
+                        : hasPresencial
+                          ? presencialStyle!.ring
+                          : 'hover:bg-white/[0.03]',
               )}
             >
               {/* Day number */}
               <div className="flex items-center justify-between mb-1">
                 <span className={cn(
                   'w-7 h-7 flex items-center justify-center text-xs font-medium relative transition-all',
-                  // Use hexagon shape for espublico and presencial (no rounded-full/overflow-hidden so clip-path works)
-                  (!isToday && (hasEspublico || hasPresencial) && !hasFestivo)
+                  // Use hexagon shape only for espublico and gestiona (not presencial anymore)
+                  (!isToday && (hasEspublico || hasGestiona) && !hasFestivo)
                     ? 'rounded overflow-visible'
                     : 'rounded-full overflow-hidden',
                   isToday
@@ -1007,9 +1036,11 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                       ? 'text-white'
                       : hasEspublico
                         ? 'text-white'
-                        : hasPresencial
+                        : hasGestiona
                           ? 'text-white'
-                          : (firstColor ? 'text-white/90' : 'text-white/50')
+                          : hasPresencial
+                            ? 'text-white'
+                            : (firstColor ? 'text-white/90' : 'text-white/50')
                 )}>
                   {/* Festivo: red filled circle */}
                   {!isToday && hasFestivo && (
@@ -1022,15 +1053,19 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                       style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                     />
                   )}
-                  {/* Presencial: hexagon shape based on type */}
-                  {!isToday && hasPresencial && !hasFestivo && !hasEspublico && (
+                  {/* Gestiona: teal hexagon (all-day event) */}
+                  {!isToday && hasGestiona && !hasFestivo && !hasEspublico && (
                     <span
-                      className={cn('absolute inset-0', presencialStyle!.circle.split(' ')[0])}
+                      className={cn('absolute inset-0', GESTIONA_STYLE.color)}
                       style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                     />
                   )}
+                  {/* Presencial: filled circle (already highlighted with cell background) */}
+                  {!isToday && hasPresencial && !hasFestivo && !hasEspublico && !hasGestiona && (
+                    <span className={cn('absolute inset-0 rounded-full', presencialStyle!.circle.split(' ')[0])} />
+                  )}
                   {/* Regular event: subtle color ring */}
-                  {!isToday && !hasPresencial && !hasFestivo && !hasEspublico && firstColor && (
+                  {!isToday && !hasPresencial && !hasFestivo && !hasEspublico && !hasGestiona && firstColor && (
                     <span className={cn('absolute inset-0 rounded-full', firstColor.ring)} />
                   )}
                   <span className="relative z-10">{dayNum}</span>
@@ -1050,6 +1085,7 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                   const color = colorMap.get(ev.Convocatoria ?? '')
                   const evFestivo   = isTipoFestivo(ev.Tipo)
                   const evEspublico = isTipoEspublico(ev.Tipo)
+                  const evGestiona  = isTipoGestiona(ev.Tipo)
                   return (
                     <button
                       key={ei}
@@ -1060,9 +1096,11 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                           ? 'bg-red-500/20 text-red-200 border-red-500/40'
                           : evEspublico
                             ? 'bg-purple-500/20 text-purple-200 border-purple-500/40'
-                            : color
-                              ? `${color.bg} ${color.text} ${color.border}`
-                              : 'bg-white/10 text-white/60 border-white/20'
+                            : evGestiona
+                              ? 'bg-teal-500/20 text-teal-200 border-teal-500/40'
+                              : color
+                                ? `${color.bg} ${color.text} ${color.border}`
+                                : 'bg-white/10 text-white/60 border-white/20'
                       )}
                       title={ev.Actividad ?? ev.Convocatoria ?? ''}
                     >
@@ -1072,7 +1110,13 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                           style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                         />
                       )}
-                      {ev['Hora inicio'] && !evFestivo && !evEspublico && (
+                      {evGestiona && !evEspublico && (
+                        <span
+                          className="w-1.5 h-1.5 bg-teal-300 flex-shrink-0"
+                          style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                        />
+                      )}
+                      {ev['Hora inicio'] && !evFestivo && !evEspublico && !evGestiona && (
                         <span className="opacity-70 mr-1">{ev['Hora inicio'].slice(0, 5)}</span>
                       )}
                       {ev.Actividad || ev.Convocatoria || ev.CÓDIGO}
@@ -1221,9 +1265,10 @@ function DayViewModal({ date, events, colorMap, onClose, onCreateEvent, onEventC
                           const endMin = parseTimeToMinutes(ev['Hora fin'])
 
                           // Events without time: stack them at the top
-                          if (startMin === null) {
+                          if (startMin === null || isTipoGestiona(ev.Tipo)) {
                             const evFestivo   = isTipoFestivo(ev.Tipo)
                             const evEspublico = isTipoEspublico(ev.Tipo)
+                            const evGestiona  = isTipoGestiona(ev.Tipo)
                             return (
                               <div
                                 key={ei}
@@ -1233,9 +1278,11 @@ function DayViewModal({ date, events, colorMap, onClose, onCreateEvent, onEventC
                                     ? 'bg-red-500/20 border-red-500/40'
                                     : evEspublico
                                       ? 'bg-purple-500/20 border-purple-500/40'
-                                      : color
-                                        ? `${color.bg} ${color.border}`
-                                        : 'bg-white/10 border-white/20'
+                                      : evGestiona
+                                        ? 'bg-teal-500/20 border-teal-500/40'
+                                        : color
+                                          ? `${color.bg} ${color.border}`
+                                          : 'bg-white/10 border-white/20'
                                 )}
                                 style={{ marginTop: ei * 40 }}
                                 onClick={() => onEventClick(ev)}
@@ -1249,13 +1296,19 @@ function DayViewModal({ date, events, colorMap, onClose, onCreateEvent, onEventC
                                     style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                                   />
                                 )}
+                                {evGestiona && !evEspublico && (
+                                  <span
+                                    className="w-2 h-2 bg-teal-300 flex-shrink-0"
+                                    style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                                  />
+                                )}
                                 <div className={cn(
                                   'text-[11px] font-medium truncate',
-                                  evFestivo ? 'text-red-200' : evEspublico ? 'text-purple-200' : (color?.text ?? 'text-white/80')
+                                  evFestivo ? 'text-red-200' : evEspublico ? 'text-purple-200' : evGestiona ? 'text-teal-200' : (color?.text ?? 'text-white/80')
                                 )}>
                                   {ev.Actividad || ev.Sesión || ev.CÓDIGO || '—'}
                                 </div>
-                                {ev.Sesión && ev.Actividad && !evFestivo && !evEspublico && (
+                                {ev.Sesión && ev.Actividad && !evFestivo && !evEspublico && !evGestiona && (
                                   <div className={cn('text-[10px] opacity-70 truncate', color?.text ?? 'text-white/60')}>
                                     {ev.Sesión}
                                   </div>
