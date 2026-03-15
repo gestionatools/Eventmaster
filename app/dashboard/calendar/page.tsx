@@ -555,17 +555,6 @@ export default function CalendarPage() {
           <Calendar className="w-4 h-4" /> Crear convocatoria
         </button>
 
-        {/* Create presencial event */}
-        <button
-          onClick={() => openCreatePresencial()}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-orange-500/20 text-orange-300 border border-orange-500/40 hover:bg-orange-500/30 transition-all"
-        >
-          <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2 L22 7 L22 17 L12 22 L2 17 L2 7 Z" />
-          </svg>
-          Evento Presencial
-        </button>
-
         {/* Create event */}
         <button onClick={() => openCreate()} className="btn-primary flex items-center gap-2 px-3 py-1.5 text-sm">
           <Plus className="w-4 h-4" /> Nuevo evento
@@ -860,7 +849,7 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
           const date = new Date(year, month, dayNum)
           const isToday = sameDay(date, today)
           const dayEvents = monthEvents.filter(e => e._date && sameDay(e._date, date))
-          const colors = Array.from(new Set(dayEvents.map(e => colorMap.get(e.Convocatoria ?? '')?.dot).filter(Boolean))) as string[]
+          const colors = Array.from(new Set(dayEvents.filter(e => !isTipoFestivo(e.Tipo)).map(e => colorMap.get(e.Convocatoria ?? '')?.dot).filter(Boolean))) as string[]
           const firstFestivo    = dayEvents.find(e => isTipoFestivo(e.Tipo))
           const firstEspublico  = dayEvents.find(e => isTipoEspublico(e.Tipo))
           const firstGestiona   = dayEvents.find(e => isTipoGestiona(e.Tipo))
@@ -908,9 +897,6 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
                     className={cn('absolute inset-0', GESTIONA_STYLE.color)}
                     style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                   />
-                )}
-                {!isToday && hasPresencial && !hasFestivo && !hasEspublico && !hasGestiona && (
-                  <span className={cn('absolute inset-0 rounded-full', presencialStyle!.circle.split(' ')[0])} />
                 )}
                 <span className="relative z-10 text-[10px] leading-none">{dayNum}</span>
               </span>
@@ -1002,6 +988,7 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
           const hasGestiona   = !!firstGestiona
           const hasPresencial = !!firstPresencial
           const presencialStyle = firstPresencial ? getPresencialStyle(firstPresencial.Convocatoria) : null
+          const nonFestivoEvents = dayEvents.filter(e => !isTipoFestivo(e.Tipo))
 
           return (
             <div
@@ -1060,10 +1047,6 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                       style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                     />
                   )}
-                  {/* Presencial: filled circle (already highlighted with cell background) */}
-                  {!isToday && hasPresencial && !hasFestivo && !hasEspublico && !hasGestiona && (
-                    <span className={cn('absolute inset-0 rounded-full', presencialStyle!.circle.split(' ')[0])} />
-                  )}
                   {/* Regular event: subtle color ring */}
                   {!isToday && !hasPresencial && !hasFestivo && !hasEspublico && !hasGestiona && firstColor && (
                     <span className={cn('absolute inset-0 rounded-full', firstColor.ring)} />
@@ -1081,7 +1064,7 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
 
               {/* Events */}
               <div className="flex flex-col gap-0.5 flex-1">
-                {dayEvents.slice(0, 3).map((ev, ei) => {
+                {nonFestivoEvents.slice(0, 3).map((ev, ei) => {
                   const color = colorMap.get(ev.Convocatoria ?? '')
                   const evFestivo   = isTipoFestivo(ev.Tipo)
                   const evEspublico = isTipoEspublico(ev.Tipo)
@@ -1123,9 +1106,9 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                     </button>
                   )
                 })}
-                {dayEvents.length > 3 && (
+                {nonFestivoEvents.length > 3 && (
                   <span className="text-[10px] text-white/30 text-left px-1.5">
-                    +{dayEvents.length - 3} más
+                    +{nonFestivoEvents.length - 3} más
                   </span>
                 )}
               </div>
