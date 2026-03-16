@@ -5,7 +5,7 @@ import {
   ChevronLeft, ChevronRight, Plus, X, Calendar, Filter,
   RefreshCw, Search, Clock, User, Tag, Hash, Layers, CalendarDays, Download, Trash2, Star
 } from 'lucide-react'
-import { supabase, EventRow, GestionaEventRow } from '@/lib/supabase'
+import { supabase, EventRow, GestionaEventRow, FINEventRow } from '@/lib/supabase'
 import TopBar from '@/components/TopBar'
 import { cn } from '@/lib/utils'
 import CreateConvocatoriaModal from './CreateConvocatoriaModal'
@@ -13,6 +13,7 @@ import DeleteConvocatoriaModal from './DeleteConvocatoriaModal'
 import CalendarEventModal from './CalendarEventModal'
 import HolidaysModal from './HolidaysModal'
 import CreateGestionaEventModal from './CreateGestionaEventModal'
+import CreateFINEventModal from './CreateFINEventModal'
 
 // ─── Color palette for convocatorias ──────────────────────────────────────────
 const CONVOCATORIA_COLORS = [
@@ -89,6 +90,13 @@ const GESTIONA_STYLE = {
   ring: 'bg-teal-500/5',
 }
 
+// FIN (Formación Interna) highlight style (yellow + diamond indicator)
+const FIN_STYLE = {
+  cell: 'bg-yellow-500/20 text-yellow-200',
+  color: 'bg-yellow-500/80',
+  ring: 'bg-yellow-500/5',
+}
+
 function isTipoFestivo(tipo: string | null | undefined) {
   return (tipo ?? '').toLowerCase() === 'festivo'
 }
@@ -112,6 +120,18 @@ function isDateInGestionaRange(date: Date, gEvents: GestionaEventRow[]): boolean
       ? (() => { const d = new Date(e.fechafin!); return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() })()
       : startDay
     return day >= startDay && day <= endDay
+  })
+}
+
+// ─── FIN date check ───────────────────────────────────────────────────────────
+function hasFINOnDay(date: Date, finEvents: FINEventRow[]): boolean {
+  return finEvents.some(e => {
+    if (!e.fecha) return false
+    // Extract YYYY-MM-DD from ISO string to avoid UTC timezone shift
+    const datePart = e.fecha.split('T')[0]
+    if (!datePart) return false
+    const [y, m, d] = datePart.split('-').map(Number)
+    return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d
   })
 }
 
@@ -300,9 +320,14 @@ export default function CalendarPage() {
   const [showDeleteConvocatoria, setShowDeleteConvocatoria]         = useState(false)
   const [showHolidaysModal, setShowHolidaysModal]                   = useState(false)
   const [showCreateGestionaModal, setShowCreateGestionaModal]       = useState(false)
+  const [showCreateFINModal, setShowCreateFINModal]                 = useState(false)
 
   // Gestiona events (events_Gestiona table)
   const [gestionaEvents, setGestionaEvents] = useState<GestionaEventRow[]>([])
+
+  // FIN events (events_FIN table) + visibility filter (off by default)
+  const [finEvents, setFinEvents]   = useState<FINEventRow[]>([])
+  const [showFIN, setShowFIN]       = useState(false)
 
   // ── Fetch data ──────────────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -328,6 +353,10 @@ export default function CalendarPage() {
       // Fetch Gestiona events
       const { data: gData } = await supabase.from('events_Gestiona').select('*')
       setGestionaEvents((gData || []) as GestionaEventRow[])
+
+      // Fetch FIN events
+      const { data: finData } = await supabase.from('events_FIN').select('*')
+      setFinEvents((finData || []) as FINEventRow[])
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -582,6 +611,18 @@ export default function CalendarPage() {
           Crear Evento Gestiona
         </button>
 
+        {/* Create FIN event */}
+        <button
+          onClick={() => setShowCreateFINModal(true)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-yellow-500/20 text-yellow-300 border border-yellow-500/40 hover:bg-yellow-500/30 transition-all"
+        >
+          <span
+            className="w-3.5 h-3.5 bg-yellow-300 inline-block flex-shrink-0"
+            style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
+          />
+          Crear convocatoria FIN
+        </button>
+
         {/* Create convocatoria – Calendar modal */}
         <button
           onClick={() => setShowCalendarEventModal(true)}
@@ -702,11 +743,33 @@ export default function CalendarPage() {
         {filterTypes.length > 0 && (
           <button
             onClick={() => setFilterTypes([])}
-            className="text-xs text-white/30 hover:text-white/60 ml-auto transition-all"
+            className="text-xs text-white/30 hover:text-white/60 transition-all"
           >
             × limpiar
           </button>
         )}
+
+        {/* FIN filter separator + checkbox */}
+        <span className="text-white/15 text-xs">|</span>
+        <button
+          onClick={() => setShowFIN(v => !v)}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs border transition-all',
+            showFIN
+              ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40'
+              : 'bg-white/5 text-white/40 border-white/10 hover:text-white/70 hover:bg-white/10'
+          )}
+        >
+          <span className={cn(
+            'w-3.5 h-3.5 border-2 flex items-center justify-center flex-shrink-0 transition-all',
+            showFIN ? 'border-yellow-400' : 'border-white/30'
+          )}
+            style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
+          >
+            {showFIN && <span className="text-yellow-300 text-[7px] font-bold leading-none">✓</span>}
+          </span>
+          FIN
+        </button>
       </div>
 
       {/* Calendar */}
@@ -724,6 +787,8 @@ export default function CalendarPage() {
           onCreateEvent={openCreate}
           customMonths={crossYearRange ?? undefined}
           gestionaEvents={gestionaEvents}
+          finEvents={finEvents}
+          showFIN={showFIN}
         />
       ) : (
         <MonthView
@@ -735,6 +800,8 @@ export default function CalendarPage() {
           onCreateEvent={openCreate}
           gestionaEvents={gestionaEvents}
           onEventClick={setSelectedEvent}
+          finEvents={finEvents}
+          showFIN={showFIN}
         />
       )}
 
@@ -818,12 +885,20 @@ export default function CalendarPage() {
           onSuccess={() => fetchData()}
         />
       )}
+
+      {/* Create FIN event modal */}
+      {showCreateFINModal && (
+        <CreateFINEventModal
+          onClose={() => setShowCreateFINModal(false)}
+          onSuccess={() => fetchData()}
+        />
+      )}
     </div>
   )
 }
 
 // ─── Year View ────────────────────────────────────────────────────────────────
-function YearView({ year, events, colorMap, onDayClick, onCreateEvent, customMonths, gestionaEvents }: {
+function YearView({ year, events, colorMap, onDayClick, onCreateEvent, customMonths, gestionaEvents, finEvents, showFIN }: {
   year: number
   events: ParsedEvent[]
   colorMap: Map<string, typeof CONVOCATORIA_COLORS[0]>
@@ -831,6 +906,8 @@ function YearView({ year, events, colorMap, onDayClick, onCreateEvent, customMon
   onCreateEvent: (d: Date) => void
   customMonths?: MonthSpec[]
   gestionaEvents: GestionaEventRow[]
+  finEvents: FINEventRow[]
+  showFIN: boolean
 }) {
   const months: MonthSpec[] = customMonths ?? Array.from({ length: 12 }, (_, mi) => ({ year, month: mi }))
   const showYear = customMonths != null && customMonths.some(m => m.year !== customMonths[0].year)
@@ -848,13 +925,15 @@ function YearView({ year, events, colorMap, onDayClick, onCreateEvent, customMon
           onCreateEvent={onCreateEvent}
           showYear={showYear}
           gestionaEvents={gestionaEvents}
+          finEvents={finEvents}
+          showFIN={showFIN}
         />
       ))}
     </div>
   )
 }
 
-function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, showYear, gestionaEvents }: {
+function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, showYear, gestionaEvents, finEvents, showFIN }: {
   year: number
   month: number
   events: ParsedEvent[]
@@ -863,6 +942,8 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
   onCreateEvent: (d: Date) => void
   showYear?: boolean
   gestionaEvents: GestionaEventRow[]
+  finEvents: FINEventRow[]
+  showFIN: boolean
 }) {
   const today = new Date()
   const firstDay = new Date(year, month, 1)
@@ -908,6 +989,7 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
           const hasPresencial = !!firstPresencial
           const presencialStyle = firstPresencial ? getPresencialStyle(firstPresencial.Convocatoria) : null
           const hasGestionaRange = isDateInGestionaRange(date, gestionaEvents)
+          const hasFIN = showFIN && hasFINOnDay(date, finEvents)
 
           return (
             <button
@@ -935,6 +1017,13 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
                 <span
                   className="absolute inset-0 bg-red-500/30 pointer-events-none z-20"
                   style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                />
+              )}
+              {/* FIN: yellow diamond overlay superimposed on the day */}
+              {hasFIN && (
+                <span
+                  className="absolute inset-0 bg-yellow-500/30 pointer-events-none z-20"
+                  style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
                 />
               )}
               {/* Day number with shape indicators */}
@@ -972,6 +1061,13 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
                     title="Gestiona"
                   />
                 )}
+                {hasFIN && (
+                  <span
+                    className="w-1.5 h-1.5 bg-yellow-400"
+                    style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
+                    title="FIN"
+                  />
+                )}
                 {colors.slice(0, 3).map((c, ci) => (
                   <span key={ci} className={cn('w-1.5 h-1.5 rounded-full', c)} />
                 ))}
@@ -985,7 +1081,7 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
 }
 
 // ─── Month View ───────────────────────────────────────────────────────────────
-function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, onEventClick, gestionaEvents }: {
+function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, onEventClick, gestionaEvents, finEvents, showFIN }: {
   year: number
   month: number
   events: ParsedEvent[]
@@ -994,6 +1090,8 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
   onCreateEvent: (d: Date) => void
   onEventClick: (e: ParsedEvent) => void
   gestionaEvents: GestionaEventRow[]
+  finEvents: FINEventRow[]
+  showFIN: boolean
 }) {
   const today = new Date()
   const firstDay = new Date(year, month, 1)
@@ -1047,6 +1145,7 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
           const presencialStyle = firstPresencial ? getPresencialStyle(firstPresencial.Convocatoria) : null
           const nonFestivoEvents = dayEvents.filter(e => !isTipoFestivo(e.Tipo))
           const hasGestionaRange = isDateInGestionaRange(date, gestionaEvents)
+          const hasFIN = showFIN && hasFINOnDay(date, finEvents)
 
           return (
             <div
@@ -1064,7 +1163,9 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                         ? GESTIONA_STYLE.ring
                         : hasPresencial
                           ? presencialStyle!.ring
-                          : 'hover:bg-white/[0.03]',
+                          : hasFIN
+                            ? FIN_STYLE.ring
+                            : 'hover:bg-white/[0.03]',
               )}
             >
               {/* Gestiona range: red hexagon overlay superimposed on the day cell */}
@@ -1074,13 +1175,20 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                   style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                 />
               )}
+              {/* FIN: yellow diamond overlay superimposed on the day cell */}
+              {hasFIN && (
+                <span
+                  className="absolute inset-0 bg-yellow-500/20 pointer-events-none z-10"
+                  style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
+                />
+              )}
 
               {/* Day number */}
               <div className="flex items-center justify-between mb-1">
                 <span className={cn(
                   'w-7 h-7 flex items-center justify-center text-xs font-medium relative transition-all',
-                  // Use hexagon shape only for espublico and gestiona (not presencial anymore)
-                  (!isToday && (hasEspublico || hasGestiona) && !hasFestivo)
+                  // Use polygon shape for espublico, gestiona, and FIN (diamond)
+                  (!isToday && (hasEspublico || hasGestiona || hasFIN) && !hasFestivo)
                     ? 'rounded overflow-visible'
                     : 'rounded-full overflow-hidden',
                   isToday
@@ -1093,7 +1201,9 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                           ? 'text-white'
                           : hasPresencial
                             ? 'text-white'
-                            : (firstColor ? 'text-white/90' : 'text-white/50')
+                            : hasFIN
+                              ? 'text-white'
+                              : (firstColor ? 'text-white/90' : 'text-white/50')
                 )}>
                   {/* Festivo: red filled circle */}
                   {!isToday && hasFestivo && (
@@ -1111,6 +1221,13 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                     <span
                       className={cn('absolute inset-0', GESTIONA_STYLE.color)}
                       style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+                    />
+                  )}
+                  {/* FIN: yellow diamond */}
+                  {!isToday && hasFIN && !hasFestivo && !hasEspublico && !hasGestiona && (
+                    <span
+                      className={cn('absolute inset-0', FIN_STYLE.color)}
+                      style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
                     />
                   )}
                   {/* Regular event: subtle color ring */}
@@ -1176,6 +1293,16 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                   <span className="text-[10px] text-white/30 text-left px-1.5">
                     +{nonFestivoEvents.length - 3} más
                   </span>
+                )}
+                {/* FIN indicator badge */}
+                {hasFIN && (
+                  <div className="w-full text-left px-1.5 py-0.5 rounded text-[10px] leading-snug truncate border bg-yellow-500/20 text-yellow-200 border-yellow-500/40 flex items-center gap-1">
+                    <span
+                      className="w-1.5 h-1.5 bg-yellow-300 flex-shrink-0"
+                      style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
+                    />
+                    FIN
+                  </div>
                 )}
               </div>
             </div>
