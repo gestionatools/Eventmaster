@@ -14,6 +14,7 @@ import CalendarEventModal from './CalendarEventModal'
 import HolidaysModal from './HolidaysModal'
 import CreateGestionaEventModal from './CreateGestionaEventModal'
 import CreateFINEventModal from './CreateFINEventModal'
+import CreateSpecialFINEventModal from './CreateSpecialFINEventModal'
 
 // ─── Color palette for convocatorias ──────────────────────────────────────────
 const CONVOCATORIA_COLORS = [
@@ -321,6 +322,7 @@ export default function CalendarPage() {
   const [showHolidaysModal, setShowHolidaysModal]                   = useState(false)
   const [showCreateGestionaModal, setShowCreateGestionaModal]       = useState(false)
   const [showCreateFINModal, setShowCreateFINModal]                 = useState(false)
+  const [showCreateSpecialFINModal, setShowCreateSpecialFINModal]   = useState(false)
 
   // Gestiona events (events_Gestiona table)
   const [gestionaEvents, setGestionaEvents] = useState<GestionaEventRow[]>([])
@@ -623,6 +625,18 @@ export default function CalendarPage() {
           Crear convocatoria FIN
         </button>
 
+        {/* Create special FIN event */}
+        <button
+          onClick={() => setShowCreateSpecialFINModal(true)}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-yellow-500/10 text-yellow-200 border border-yellow-500/30 hover:bg-yellow-500/20 transition-all"
+        >
+          <span
+            className="w-3.5 h-3.5 bg-yellow-200 inline-block flex-shrink-0"
+            style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
+          />
+          Añadir convocatoria especial FIN
+        </button>
+
         {/* Create convocatoria – Calendar modal */}
         <button
           onClick={() => setShowCalendarEventModal(true)}
@@ -890,6 +904,14 @@ export default function CalendarPage() {
       {showCreateFINModal && (
         <CreateFINEventModal
           onClose={() => setShowCreateFINModal(false)}
+          onSuccess={() => fetchData()}
+        />
+      )}
+
+      {/* Create special FIN event modal */}
+      {showCreateSpecialFINModal && (
+        <CreateSpecialFINEventModal
+          onClose={() => setShowCreateSpecialFINModal(false)}
           onSuccess={() => fetchData()}
         />
       )}
