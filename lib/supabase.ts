@@ -32,6 +32,16 @@ export type GestionaEventRow = {
   emplazamiento: string | null
 }
 
+export type FINEventRow = {
+  id: number
+  created_at: string
+  fecha: string | null
+  horainicio: string | null
+  horafin: string | null
+  convocatoria: string | null
+  tipo: string | null
+}
+
 export type Database = {
   public: {
     Tables: {
