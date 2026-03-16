@@ -25,26 +25,37 @@ export interface DaySlot {
 }
 
 export const DAY_SLOTS: DaySlot[] = [
-  { id: 'kickoff1', label: 'KICKOFF – Día 1',     suggestedDay: 'Viernes'   },
-  { id: 'kickoff2', label: 'KICKOFF – Día 2',     suggestedDay: 'Lunes'     },
-  { id: 's2d1',     label: 'Sesión 2 – Día 1',   suggestedDay: 'Martes'    },
-  { id: 's2d2',     label: 'Sesión 2 – Día 2',   suggestedDay: 'Miércoles' },
-  { id: 's2d3',     label: 'Sesión 2 – Día 3',   suggestedDay: 'Jueves'    },
-  { id: 's2d4',     label: 'Sesión 2 – Día 4',   suggestedDay: 'Viernes'   },
-  { id: 's3d1',     label: 'Sesión 3 – Día 1',   suggestedDay: 'Martes'    },
-  { id: 's3d2',     label: 'Sesión 3 – Día 2',   suggestedDay: 'Miércoles' },
-  { id: 's3d3',     label: 'Sesión 3 – Día 3',   suggestedDay: 'Jueves'    },
-  { id: 's3d4',     label: 'Sesión 3 – Día 4',   suggestedDay: 'Viernes'   },
-  { id: 'cierre',   label: 'Fecha fin evaluación', suggestedDay: ''         },
+  { id: 'kickoff1', label: 'KICKOFF – Día 1',          suggestedDay: 'Viernes'   },
+  { id: 'kickoff2', label: 'KICKOFF – Día 2',          suggestedDay: 'Lunes'     },
+  { id: 's2d1',     label: 'Sesión 2 – Día 1',        suggestedDay: 'Martes'    },
+  { id: 'w0',       label: 'Webinar 0',                suggestedDay: ''          },
+  { id: 'w1',       label: 'Webinar 1',                suggestedDay: ''          },
+  { id: 'w2',       label: 'Webinar 2',                suggestedDay: ''          },
+  { id: 'w3',       label: 'Webinar 3',                suggestedDay: ''          },
+  { id: 'w4',       label: 'Webinar 4',                suggestedDay: ''          },
+  { id: 'w5',       label: 'Webinar 5',                suggestedDay: ''          },
+  { id: 'w6',       label: 'Webinar 6',                suggestedDay: ''          },
+  { id: 's2d2',     label: 'Sesión 2 – Día 2',        suggestedDay: 'Miércoles' },
+  { id: 's2d3',     label: 'Sesión 2 – Día 3',        suggestedDay: 'Jueves'    },
+  { id: 's2d4',     label: 'Sesión 2 – Día 4',        suggestedDay: 'Viernes'   },
+  { id: 'w7',       label: 'Webinar 7',                suggestedDay: ''          },
+  { id: 'w8',       label: 'Webinar 8',                suggestedDay: ''          },
+  { id: 'w9',       label: 'Webinar 9',                suggestedDay: ''          },
+  { id: 'w10',      label: 'Webinar 10',               suggestedDay: ''          },
+  { id: 's3d1',     label: 'Sesión 3 – Día 1',        suggestedDay: 'Martes'    },
+  { id: 's3d2',     label: 'Sesión 3 – Día 2',        suggestedDay: 'Miércoles' },
+  { id: 's3d3',     label: 'Sesión 3 – Día 3',        suggestedDay: 'Jueves'    },
+  { id: 's3d4',     label: 'Sesión 3 – Día 4',        suggestedDay: 'Viernes'   },
+  { id: 'cierre',   label: 'Fecha fin evaluación',     suggestedDay: ''          },
 ]
 
 export const TEMPLATE_EVENTS: TemplateEventDef[] = [
   // KICKOFF Día 1
-  { slotId: 'kickoff1', Actividad: 'KICKOFF bienvenida / Inicio', Sesión: 'Online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '11:30' },
+  { slotId: 'kickoff1', Actividad: 'Kick off. Panorámica del proceso de certificación', Sesión: 'KICKOFF', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '11:00' },
   // KICKOFF Día 2
-  { slotId: 'kickoff2', Actividad: 'café bienvenida/demo plataforma formación', Sesión: 'online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '11:00' },
+  { slotId: 'kickoff2', Actividad: 'Bienvenida coffee online: demo plataforma de formación', Sesión: 'KICKOFF', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '11:00' },
   // Sesión 2 – Día 1
-  { slotId: 's2d1', Actividad: 'Bienvenida institucional', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '10:00' },
+  { slotId: 's2d1', Actividad: 'Bienvenida institucional', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '' },
   { slotId: 's2d1', Actividad: 'Taller 1 "Configuración básica de trámites externos y tesauros"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '10:00', 'Hora fin': '11:30' },
   { slotId: 's2d1', Actividad: 'Taller 2 "Gestiona Code"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '12:00', 'Hora fin': '13:30' },
   { slotId: 's2d1', Actividad: 'Formación Expertos grupo esPublico "Migración de datos"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '13:30', 'Hora fin': '14:30' },
@@ -52,6 +63,20 @@ export const TEMPLATE_EVENTS: TemplateEventDef[] = [
   { slotId: 's2d1', Actividad: 'Comida', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '14:30', 'Hora fin': '16:30' },
   { slotId: 's2d1', Actividad: 'Teambuilding', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '16:30', 'Hora fin': '18:30' },
   { slotId: 's2d1', Actividad: 'Cena', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '20:30', 'Hora fin': '' },
+  // Webinar 0
+  { slotId: 'w0', Actividad: 'Webinar 0 Condición de usuario apoderado. Implicaciones y responsabilidades', Sesión: 'Online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  // Webinar 1
+  { slotId: 'w1', Actividad: 'Webinar 1 Contextualización del catálogo', Sesión: 'Online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  // Webinar 2
+  { slotId: 'w2', Actividad: 'Webinar 2 Configuración de campos personalizados', Sesión: 'Online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  // Webinar 3
+  { slotId: 'w3', Actividad: 'Webinar 3 Construcción de documentos inteligentes', Sesión: 'Online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  // Webinar 4
+  { slotId: 'w4', Actividad: 'Webinar 4 Circuito de Resolución Singular', Sesión: 'Online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  // Webinar 5
+  { slotId: 'w5', Actividad: 'Webinar 5 Circuito de Resolución Plural', Sesión: 'Online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  // Webinar 6
+  { slotId: 'w6', Actividad: 'Webinar 6 Simplificación administrativa', Sesión: 'Online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '12:00' },
   // Sesión 2 – Día 2
   { slotId: 's2d2', Actividad: 'Taller 3 "Construcción de documentos inteligentes"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '10:00' },
   { slotId: 's2d2', Actividad: 'Taller 4 "Circuito de resolución singular"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '10:30', 'Hora fin': '13:00' },
@@ -66,7 +91,15 @@ export const TEMPLATE_EVENTS: TemplateEventDef[] = [
   { slotId: 's2d4', Actividad: 'Introducción al módulo de diseño de control interno', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '10:00' },
   { slotId: 's2d4', Actividad: 'Taller 7 "Búsquedas avanzadas de Gestiona"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '10:00', 'Hora fin': '11:00' },
   { slotId: 's2d4', Actividad: 'Formación Expertos grupo esPublico: "Plataforma editorial de esPublico"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '11:30', 'Hora fin': '12:30' },
-  { slotId: 's2d4', Actividad: 'Formación Expertos grupo esPublico: "Cumplimiento normativo en el grupo esPublico"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '12:30', 'Hora fin': '13:30' },
+  { slotId: 's2d4', Actividad: 'Formación Expertos grupo esPublico: "Cumplimiento normativo en el grupo esPublico y sus servicios"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '12:30', 'Hora fin': '13:30' },
+  // Webinar 7
+  { slotId: 'w7', Actividad: 'Webinar 7 Módulo de diseño', Sesión: 'Online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  // Webinar 8
+  { slotId: 'w8', Actividad: 'Webinar 8 Taller de Circuitos de Resolución con gasto', Sesión: 'Online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  // Webinar 9
+  { slotId: 'w9', Actividad: 'Webinar 9 Taller de Búsquedas Avanzadas. Conceptos y opciones disponibles.', Sesión: 'Online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  // Webinar 10
+  { slotId: 'w10', Actividad: 'Webinar 10 Taller de Analítica de datos. Elementos básicos para la construcción de cuadros de mando', Sesión: 'Online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '12:00' },
   // Sesión 3 – Día 1
   { slotId: 's3d1', Actividad: 'Formación Expertos grupo esPublico: "Módulo de Control Interno"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '10:00' },
   { slotId: 's3d1', Actividad: 'Taller 8: "Taller del módulo de diseño de control interno"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '10:00', 'Hora fin': '11:30' },
