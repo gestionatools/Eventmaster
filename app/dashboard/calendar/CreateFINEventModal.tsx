@@ -2,13 +2,74 @@
 
 import React, { useState, useRef, useCallback } from 'react'
 import {
-  X, Plus, Upload, RefreshCw, FileSpreadsheet, Check, AlertTriangle,
-  Calendar, Clock, ChevronLeft, ChevronRight,
+  X, Plus, Upload, RefreshCw, FileSpreadsheet, Check, AlertTriangle, Calendar,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 
-// ─── FIN field definitions ────────────────────────────────────────────────────
+// ─── FIN template events ──────────────────────────────────────────────────────
+interface FINTemplateDef {
+  id: string
+  actividad: string
+  horainicio: string
+  horafin: string
+}
+
+export const FIN_TEMPLATE_EVENTS: FINTemplateDef[] = [
+  { id: 'fin-01', actividad: 'Presentación del programa onboarding',                                        horainicio: '13:00', horafin: '14:30' },
+  { id: 'fin-02', actividad: 'Introducción al PAC.',                                                        horainicio: '8:00',  horafin: '9:30'  },
+  { id: 'fin-03', actividad: 'Qué es un ayuntamiento. Breve historia de Gestiona.',                         horainicio: '9:30',  horafin: '11:00' },
+  { id: 'fin-04', actividad: 'Dinámicas Gestiona 360',                                                      horainicio: '11:00', horafin: '13:00' },
+  { id: 'fin-05', actividad: 'Formación esPublico',                                                         horainicio: '13:00', horafin: '14:30' },
+  { id: 'fin-06', actividad: 'Ratificaciones y entrega demos',                                              horainicio: '8:00',  horafin: '9:30'  },
+  { id: 'fin-07', actividad: 'Gestiona. Visión General y Página de inicio.',                                horainicio: '9:30',  horafin: '11:00' },
+  { id: 'fin-08', actividad: 'Sede electrónica. Portal de transparencia y tablón de anuncios',              horainicio: '11:00', horafin: '13:00' },
+  { id: 'fin-09', actividad: 'Terceros. Módulo de Registro y OAMR',                                        horainicio: '8:00',  horafin: '11:00' },
+  { id: 'fin-10', actividad: 'Metodología de implantación registro',                                       horainicio: '11:00', horafin: '12:30' },
+  { id: 'fin-11', actividad: 'Exposición implantación registro',                                            horainicio: '8:00',  horafin: '9:30'  },
+  { id: 'fin-12', actividad: 'Módulo de Expedientes y libros oficiales',                                    horainicio: '9:30',  horafin: '12:00' },
+  { id: 'fin-13', actividad: 'Metodología de implantación tramitación libre',                               horainicio: '12:00', horafin: '13:30' },
+  { id: 'fin-14', actividad: 'Exposición implantación tramitación libre',                                   horainicio: '8:00',  horafin: '9:30'  },
+  { id: 'fin-15', actividad: 'Configuración general de Gestiona. Usuarios, grupos y permisos.',             horainicio: '9:30',  horafin: '11:30' },
+  { id: 'fin-16', actividad: 'Requisitos técnicos. Gestiona envía y APP móvil',                            horainicio: '11:30', horafin: '13:00' },
+  { id: 'fin-17', actividad: 'Fuentes de información del equipo de medios',                                 horainicio: '13:00', horafin: '15:00' },
+  { id: 'fin-18', actividad: 'Estrategias AGE-AOC. Procesos de alta',                                      horainicio: '9:00',  horafin: '11:00' },
+  { id: 'fin-19', actividad: 'Teoría y conceptos del circuito de resolución en Gestiona (Genérico)',        horainicio: '12:00', horafin: '15:00' },
+  { id: 'fin-20', actividad: 'Libros oficiales y órganos colegiados',                                       horainicio: '9:30',  horafin: '12:30' },
+  { id: 'fin-21', actividad: 'Presentación catálogo',                                                       horainicio: '12:30', horafin: '14:00' },
+  { id: 'fin-22', actividad: 'Taller creación de procedimientos',                                           horainicio: '8:00',  horafin: '11:00' },
+  { id: 'fin-23', actividad: 'Presentación trámites externos',                                              horainicio: '11:00', horafin: '12:30' },
+  { id: 'fin-24', actividad: 'Taller Trámites externos',                                                    horainicio: '8:00',  horafin: '11:00' },
+  { id: 'fin-25', actividad: 'Exposición Órganos colegiados',                                               horainicio: '12:00', horafin: '14:00' },
+  { id: 'fin-26', actividad: 'Teoría y conceptos de la fiscalización de expedientes con gasto',             horainicio: '8:00',  horafin: '10:00' },
+  { id: 'fin-27', actividad: 'Proceso de bienvenida',                                                       horainicio: '10:30', horafin: '12:30' },
+  { id: 'fin-28', actividad: 'Taller Circuitos de resolución con fiscalización Genéricos',                  horainicio: '8:00',  horafin: '11:00' },
+  { id: 'fin-29', actividad: 'Exposición CR con Fiscalización Genéricos',                                   horainicio: '11:00', horafin: '12:30' },
+  { id: 'fin-30', actividad: 'Gestión de clientes',                                                         horainicio: '12:30', horafin: '14:30' },
+  { id: 'fin-31', actividad: 'Metodología de implantación',                                                 horainicio: '8:00',  horafin: '11:00' },
+  { id: 'fin-32', actividad: 'Dinámicas de Gestor',                                                         horainicio: '11:00', horafin: '12:30' },
+  { id: 'fin-33', actividad: 'Factura electrónica',                                                         horainicio: '12:30', horafin: '14:30' },
+  { id: 'fin-34', actividad: 'Exposición Gestión de clientes',                                              horainicio: '9:00',  horafin: '10:30' },
+  { id: 'fin-35', actividad: 'Exposición metodología de implantación',                                      horainicio: '11:30', horafin: '13:00' },
+  { id: 'fin-36', actividad: 'Búsquedas avanzadas',                                                         horainicio: '8:00',  horafin: '10:00' },
+  { id: 'fin-37', actividad: 'Gestdata',                                                                     horainicio: '10:00', horafin: '12:00' },
+  { id: 'fin-38', actividad: 'Preparación training',                                                        horainicio: '12:00', horafin: '15:00' },
+  { id: 'fin-39', actividad: 'TE avanzados. Markdown (condicionales y calculados)',                         horainicio: '8:00',  horafin: '12:00' },
+  { id: 'fin-40', actividad: 'Presentación archivo',                                                        horainicio: '12:00', horafin: '13:30' },
+  { id: 'fin-41', actividad: 'Taller archivo',                                                              horainicio: '13:30', horafin: '15:00' },
+  { id: 'fin-42', actividad: 'CR sin gasto Avanzados',                                                      horainicio: '8:00',  horafin: '10:30' },
+  { id: 'fin-43', actividad: 'Exposición CR con Fiscalización Genéricos',                                   horainicio: '12:00', horafin: '13:30' },
+  { id: 'fin-44', actividad: 'Control interno. Refuerzo teoría.',                                            horainicio: '13:30', horafin: '14:30' },
+  { id: 'fin-45', actividad: 'CR con gasto Avanzado',                                                       horainicio: '8:00',  horafin: '10:30' },
+  { id: 'fin-46', actividad: 'Exposición CR con gasto Avanzado',                                            horainicio: '12:30', horafin: '14:30' },
+  { id: 'fin-47', actividad: 'RPA',                                                                         horainicio: '8:00',  horafin: '10:00' },
+  { id: 'fin-48', actividad: 'Integraciones backoffice y proyectos técnicos',                               horainicio: '10:00', horafin: '11:30' },
+  { id: 'fin-49', actividad: 'Tramitación reglada',                                                         horainicio: '11:30', horafin: '15:00' },
+  { id: 'fin-50', actividad: 'Actos plurales',                                                              horainicio: '8:00',  horafin: '11:30' },
+  { id: 'fin-51', actividad: 'Refuerzo viajes',                                                             horainicio: '11:30', horafin: ''      },
+]
+
+// ─── FIN field definitions (for Excel import) ─────────────────────────────────
 const FIN_FIELDS = ['fecha', 'horainicio', 'horafin', 'convocatoria', 'tipo'] as const
 type FINField = typeof FIN_FIELDS[number]
 
@@ -17,7 +78,7 @@ const FIN_FIELD_LABELS: Record<FINField, string> = {
   horainicio: 'Hora inicio',
   horafin: 'Hora fin',
   convocatoria: 'Convocatoria',
-  tipo: 'Tipo',
+  tipo: 'Tipo / Actividad',
 }
 
 function autoDetectFINField(colName: string): FINField | '' {
@@ -25,9 +86,9 @@ function autoDetectFINField(colName: string): FINField | '' {
   const aliases: [string[], FINField][] = [
     [['fecha', 'date', 'día', 'dia', 'day', 'fec'], 'fecha'],
     [['horainicio', 'hora inicio', 'hora_inicio', 'start', 'inicio', 'from', 'start time', 'horaini', 'hora ini'], 'horainicio'],
-    [['horafin', 'hora fin', 'hora_fin', 'end', 'fin', 'to', 'end time', 'hora fin', 'hora_fin'], 'horafin'],
+    [['horafin', 'hora fin', 'hora_fin', 'end', 'fin', 'to', 'end time'], 'horafin'],
     [['convocatoria', 'call', 'programa', 'convoc', 'nombre', 'name'], 'convocatoria'],
-    [['tipo', 'type', 'modalidad', 'formato', 'format'], 'tipo'],
+    [['tipo', 'type', 'modalidad', 'actividad', 'activity', 'format'], 'tipo'],
   ]
   for (const [keys, field] of aliases) {
     if (keys.some(k => s === k || s.includes(k))) return field
@@ -82,19 +143,6 @@ async function parseFile(file: File): Promise<{ headers: string[]; rows: Record<
   }
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-const MONTHS_ES = [
-  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
-  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
-]
-const DAYS_ES = ['L','M','X','J','V','S','D']
-
-function sameDay(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-}
-
 // ─── Props ────────────────────────────────────────────────────────────────────
 interface Props {
   onClose: () => void
@@ -103,56 +151,55 @@ interface Props {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function CreateFINEventModal({ onClose, onSuccess }: Props) {
-  const [activeTab, setActiveTab] = useState<'calendar' | 'excel'>('calendar')
+  const [activeTab, setActiveTab] = useState<'template' | 'excel'>('template')
 
-  // ── Calendar tab state ──────────────────────────────────────────────────────
-  const [calDate, setCalDate]           = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [convocatoria, setConvocatoria] = useState('')
-  const [horainicio, setHorainicio]     = useState('')
-  const [horafin, setHorafin]           = useState('')
-  const [tipo, setTipo]                 = useState('')
-  const [saving, setSaving]             = useState(false)
-  const [saveError, setSaveError]       = useState<string | null>(null)
+  // ── Template tab state ──────────────────────────────────────────────────────
+  const [convName, setConvName]       = useState('')
+  // eventDates[id] = 'YYYY-MM-DD'
+  const [eventDates, setEventDates]   = useState<Record<string, string>>({})
+  const [saving, setSaving]           = useState(false)
+  const [saveError, setSaveError]     = useState<string | null>(null)
 
   // ── Excel tab state ─────────────────────────────────────────────────────────
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [isDragging, setIsDragging]     = useState(false)
+  const [isDragging, setIsDragging]       = useState(false)
   const [parsedHeaders, setParsedHeaders] = useState<string[]>([])
-  const [parsedRows, setParsedRows]     = useState<Record<string, string>[]>([])
+  const [parsedRows, setParsedRows]       = useState<Record<string, string>[]>([])
   const [columnMapping, setColumnMapping] = useState<Record<string, FINField | ''>>({})
-  const [importStep, setImportStep]     = useState<'upload' | 'mapping' | 'importing' | 'done'>('upload')
-  const [importError, setImportError]   = useState<string | null>(null)
-  const [importCount, setImportCount]   = useState(0)
+  const [importStep, setImportStep]       = useState<'upload' | 'mapping' | 'importing' | 'done'>('upload')
+  const [importError, setImportError]     = useState<string | null>(null)
+  const [importCount, setImportCount]     = useState(0)
 
-  // ── Calendar navigation ─────────────────────────────────────────────────────
-  const calYear  = calDate.getFullYear()
-  const calMonth = calDate.getMonth()
-  const today    = new Date()
+  const assignedCount = Object.values(eventDates).filter(Boolean).length
 
-  const goPrevMonth = () => {
-    const d = new Date(calDate); d.setMonth(calMonth - 1); setCalDate(d)
-  }
-  const goNextMonth = () => {
-    const d = new Date(calDate); d.setMonth(calMonth + 1); setCalDate(d)
-  }
+  // ── Template save ───────────────────────────────────────────────────────────
+  const handleSaveTemplate = async () => {
+    if (!convName.trim()) { setSaveError('Introduce un nombre para la convocatoria FIN'); return }
+    const toInsert = FIN_TEMPLATE_EVENTS.filter(ev => !!eventDates[ev.id])
+    if (!toInsert.length) { setSaveError('Asigna al menos una fecha a un evento'); return }
 
-  // ── Calendar save ───────────────────────────────────────────────────────────
-  const handleSave = async () => {
-    if (!selectedDate) { setSaveError('Selecciona una fecha en el calendario'); return }
     setSaving(true)
     setSaveError(null)
     try {
-      const pad  = (n: number) => String(n).padStart(2, '0')
-      const isoFecha = `${selectedDate.getFullYear()}-${pad(selectedDate.getMonth() + 1)}-${pad(selectedDate.getDate())}T00:00:00+00:00`
-      const { error } = await supabase.from('events_FIN').insert([{
-        fecha:        isoFecha,
-        horainicio:   horainicio || null,
-        horafin:      horafin   || null,
-        convocatoria: convocatoria || null,
-        tipo:         tipo         || null,
-      }])
-      if (error) throw error
+      const pad = (n: number) => String(n).padStart(2, '0')
+      const rows = toInsert.map(ev => {
+        const iso = eventDates[ev.id]
+        const [y, m, d] = iso.split('-').map(Number)
+        const fecha = `${y}-${pad(m)}-${pad(d)}T00:00:00+00:00`
+        return {
+          fecha,
+          horainicio:   ev.horainicio  || null,
+          horafin:      ev.horafin     || null,
+          convocatoria: convName.trim(),
+          tipo:         ev.actividad,
+        }
+      })
+
+      const CHUNK = 500
+      for (let i = 0; i < rows.length; i += CHUNK) {
+        const { error } = await supabase.from('events_FIN').insert(rows.slice(i, i + CHUNK))
+        if (error) throw error
+      }
       onSuccess()
       onClose()
     } catch (err) {
@@ -215,12 +262,6 @@ export default function CreateFINEventModal({ onClose, onSuccess }: Props) {
     }
   }
 
-  // ── Calendar grid ───────────────────────────────────────────────────────────
-  const firstDay   = new Date(calYear, calMonth, 1)
-  const startOffset = (firstDay.getDay() + 6) % 7
-  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
-  const totalCells  = Math.ceil((startOffset + daysInMonth) / 7) * 7
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -239,7 +280,7 @@ export default function CreateFINEventModal({ onClose, onSuccess }: Props) {
             </div>
             <div>
               <h2 className="text-white font-semibold text-lg">Crear Convocatoria FIN</h2>
-              <p className="text-white/40 text-xs">Formación Interna · acrónimo FIN</p>
+              <p className="text-white/40 text-xs">Formación Interna · {FIN_TEMPLATE_EVENTS.length} actividades</p>
             </div>
           </div>
           <button
@@ -253,15 +294,15 @@ export default function CreateFINEventModal({ onClose, onSuccess }: Props) {
         {/* ── Tabs ── */}
         <div className="flex border-b border-white/10 flex-shrink-0">
           <button
-            onClick={() => setActiveTab('calendar')}
+            onClick={() => setActiveTab('template')}
             className={cn(
               'flex-1 py-3 text-sm font-medium transition-all flex items-center justify-center gap-2',
-              activeTab === 'calendar'
+              activeTab === 'template'
                 ? 'text-yellow-300 border-b-2 border-yellow-400 bg-yellow-500/5'
                 : 'text-white/40 hover:text-white/70'
             )}
           >
-            <Calendar className="w-4 h-4" /> Crear convocatoria
+            <Calendar className="w-4 h-4" /> Desde Plantilla
           </button>
           <button
             onClick={() => setActiveTab('excel')}
@@ -277,139 +318,99 @@ export default function CreateFINEventModal({ onClose, onSuccess }: Props) {
         </div>
 
         {/* ════════════════════════════════════════════════════════════════
-            TAB: CALENDAR
+            TAB: TEMPLATE
         ════════════════════════════════════════════════════════════════ */}
-        {activeTab === 'calendar' && (
+        {activeTab === 'template' && (
           <>
-            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+            {/* Convocatoria name */}
+            <div className="p-4 border-b border-white/5 flex-shrink-0">
+              <label className="text-white/50 text-xs mb-1.5 block uppercase tracking-wider">
+                Nombre de la Convocatoria FIN
+              </label>
+              <input
+                type="text"
+                placeholder="Ej: FIN 2026 – Ayuntamiento de..."
+                value={convName}
+                onChange={e => setConvName(e.target.value)}
+                className="input-field text-sm"
+                autoFocus
+              />
+            </div>
 
-              {/* Mini calendar */}
-              <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-4">
-                {/* Month nav */}
-                <div className="flex items-center justify-between mb-3">
-                  <button onClick={goPrevMonth} className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-all">
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <span className="text-white/80 text-sm font-semibold">
-                    {MONTHS_ES[calMonth]} {calYear}
-                  </span>
-                  <button onClick={goNextMonth} className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-all">
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
+            {/* Events list */}
+            <div className="flex-1 overflow-y-auto divide-y divide-white/5">
+              {FIN_TEMPLATE_EVENTS.map((ev, idx) => {
+                const dateVal  = eventDates[ev.id] ?? ''
+                const hasDate  = !!dateVal
+                return (
+                  <div
+                    key={ev.id}
+                    className={cn(
+                      'flex items-center gap-3 px-4 py-2.5 hover:bg-white/[0.02] transition-all',
+                      hasDate && 'bg-yellow-500/5'
+                    )}
+                  >
+                    {/* Index + check */}
+                    <span className={cn(
+                      'w-5 h-5 flex items-center justify-center text-[10px] font-mono flex-shrink-0 rounded',
+                      hasDate ? 'text-yellow-300' : 'text-white/20'
+                    )}>
+                      {hasDate ? <Check className="w-3.5 h-3.5" /> : idx + 1}
+                    </span>
 
-                {/* Day headers */}
-                <div className="grid grid-cols-7 gap-1 mb-1">
-                  {DAYS_ES.map(d => (
-                    <div key={d} className="text-white/25 text-[10px] text-center font-semibold uppercase">{d}</div>
-                  ))}
-                </div>
+                    {/* Activity name */}
+                    <div className="flex-1 min-w-0">
+                      <span className={cn(
+                        'text-xs block truncate',
+                        hasDate ? 'text-white/80' : 'text-white/50'
+                      )}>
+                        {ev.actividad}
+                      </span>
+                      <span className="text-white/25 text-[10px] font-mono">
+                        {ev.horainicio}{ev.horafin ? ` – ${ev.horafin}` : ''}
+                      </span>
+                    </div>
 
-                {/* Day cells */}
-                <div className="grid grid-cols-7 gap-1">
-                  {Array.from({ length: totalCells }, (_, i) => {
-                    const dayNum = i - startOffset + 1
-                    if (dayNum < 1 || dayNum > daysInMonth) return <div key={i} />
-                    const date       = new Date(calYear, calMonth, dayNum)
-                    const isToday    = sameDay(date, today)
-                    const isSelected = selectedDate ? sameDay(date, selectedDate) : false
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => setSelectedDate(date)}
-                        className={cn(
-                          'aspect-square rounded-lg flex items-center justify-center text-xs transition-all hover:bg-yellow-500/20',
-                          isSelected
-                            ? 'bg-yellow-500/40 text-yellow-200 font-bold ring-1 ring-yellow-400/60'
-                            : isToday
-                              ? 'bg-brand-500/30 text-brand-300 font-semibold'
-                              : 'text-white/60 hover:text-white'
-                        )}
-                      >
-                        {dayNum}
-                      </button>
-                    )
-                  })}
-                </div>
+                    {/* Date input */}
+                    <input
+                      type="date"
+                      value={dateVal}
+                      onChange={e =>
+                        setEventDates(prev => ({ ...prev, [ev.id]: e.target.value }))
+                      }
+                      className="input-field text-xs py-1 w-36 flex-shrink-0"
+                    />
+                  </div>
+                )
+              })}
+            </div>
 
-                {selectedDate && (
-                  <p className="text-yellow-400/70 text-xs text-center mt-3">
-                    Seleccionado: {selectedDate.getDate()} de {MONTHS_ES[selectedDate.getMonth()]} de {selectedDate.getFullYear()}
-                  </p>
-                )}
-              </div>
-
-              {/* Fields */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-white/40 text-xs mb-1.5 flex items-center gap-1.5">
-                    <Clock className="w-3 h-3" /> Hora inicio
-                  </label>
-                  <input
-                    type="time"
-                    value={horainicio}
-                    onChange={e => setHorainicio(e.target.value)}
-                    className="input-field text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-white/40 text-xs mb-1.5 flex items-center gap-1.5">
-                    <Clock className="w-3 h-3" /> Hora fin
-                  </label>
-                  <input
-                    type="time"
-                    value={horafin}
-                    onChange={e => setHorafin(e.target.value)}
-                    className="input-field text-sm"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-white/40 text-xs mb-1.5 block">Convocatoria</label>
-                <input
-                  type="text"
-                  value={convocatoria}
-                  onChange={e => setConvocatoria(e.target.value)}
-                  placeholder="Nombre de la convocatoria FIN"
-                  className="input-field text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="text-white/40 text-xs mb-1.5 block">Tipo</label>
-                <input
-                  type="text"
-                  value={tipo}
-                  onChange={e => setTipo(e.target.value)}
-                  placeholder="Tipo de formación"
-                  className="input-field text-sm"
-                />
-              </div>
-
+            {/* Footer */}
+            <div className="flex-shrink-0 border-t border-white/10 p-4">
               {saveError && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm flex items-center gap-2">
+                <div className="mb-3 bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                   {saveError}
                 </div>
               )}
-            </div>
-
-            {/* Footer */}
-            <div className="flex-shrink-0 border-t border-white/10 p-5 flex justify-end gap-3">
-              <button onClick={onClose} className="btn-secondary px-4 py-2 text-sm">
-                Cancelar
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving || !selectedDate}
-                className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/40 hover:bg-yellow-500/30 transition-all disabled:opacity-50"
-              >
-                {saving
-                  ? <><RefreshCw className="w-4 h-4 animate-spin" /> Guardando...</>
-                  : <><Plus className="w-4 h-4" /> Crear evento FIN</>
-                }
-              </button>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 text-white/30 text-xs">
+                  {assignedCount} / {FIN_TEMPLATE_EVENTS.length} actividades con fecha asignada
+                </div>
+                <button onClick={onClose} className="btn-secondary px-4 py-2 text-sm">
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSaveTemplate}
+                  disabled={saving || !convName.trim() || assignedCount === 0}
+                  className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/40 hover:bg-yellow-500/30 transition-all disabled:opacity-50"
+                >
+                  {saving
+                    ? <><RefreshCw className="w-4 h-4 animate-spin" /> Creando...</>
+                    : <><Plus className="w-4 h-4" /> Crear convocatoria FIN</>
+                  }
+                </button>
+              </div>
             </div>
           </>
         )}
@@ -489,7 +490,7 @@ export default function CreateFINEventModal({ onClose, onSuccess }: Props) {
                           onChange={e =>
                             setColumnMapping(prev => ({ ...prev, [header]: e.target.value as FINField | '' }))
                           }
-                          className="input-field text-xs py-1.5 w-44 flex-shrink-0"
+                          className="input-field text-xs py-1.5 w-48 flex-shrink-0"
                         >
                           <option value="">— No asignar —</option>
                           {FIN_FIELDS.map(f => (
