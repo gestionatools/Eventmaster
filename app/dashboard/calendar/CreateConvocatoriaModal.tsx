@@ -222,7 +222,9 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
   // Template tab state
   const [convName, setConvName] = useState('')
   const [slotDates, setSlotDates] = useState<Record<string, string>>({})
-  const [expandedSlots, setExpandedSlots] = useState<Set<string>>(new Set())
+  const [expandedSlots, setExpandedSlots] = useState<Set<string>>(
+    new Set(['s2d1', 's2d2', 's2d3', 's2d4', 's3d1', 's3d2', 's3d3', 's3d4'])
+  )
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
