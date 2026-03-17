@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback } from 'react'
 import {
-  X, Plus, Upload, RefreshCw, ChevronDown, ChevronRight,
+  X, Plus, Upload, RefreshCw,
   FileSpreadsheet, Check, AlertTriangle, Calendar
 } from 'lucide-react'
 import { supabase, EventRow } from '@/lib/supabase'
@@ -25,74 +25,141 @@ export interface DaySlot {
 }
 
 export const DAY_SLOTS: DaySlot[] = [
-  { id: 'kickoff1', label: 'KICKOFF – Día 1',     suggestedDay: 'Viernes'   },
-  { id: 'kickoff2', label: 'KICKOFF – Día 2',     suggestedDay: 'Lunes'     },
-  { id: 's2d1',     label: 'Sesión 2 – Día 1',   suggestedDay: 'Martes'    },
-  { id: 's2d2',     label: 'Sesión 2 – Día 2',   suggestedDay: 'Miércoles' },
-  { id: 's2d3',     label: 'Sesión 2 – Día 3',   suggestedDay: 'Jueves'    },
-  { id: 's2d4',     label: 'Sesión 2 – Día 4',   suggestedDay: 'Viernes'   },
-  { id: 's3d1',     label: 'Sesión 3 – Día 1',   suggestedDay: 'Martes'    },
-  { id: 's3d2',     label: 'Sesión 3 – Día 2',   suggestedDay: 'Miércoles' },
-  { id: 's3d3',     label: 'Sesión 3 – Día 3',   suggestedDay: 'Jueves'    },
-  { id: 's3d4',     label: 'Sesión 3 – Día 4',   suggestedDay: 'Viernes'   },
-  { id: 'cierre',   label: 'Fecha fin evaluación', suggestedDay: ''         },
+  // Sesión 1
+  { id: 'ev01', label: 'Kick off. Panorámica del proceso de certificación',                              suggestedDay: '' },
+  { id: 'ev02', label: 'Bienvenida coffee online: demo plataforma de formación',                         suggestedDay: '' },
+  // Sesión 2 – bloque A
+  { id: 'ev03', label: 'Bienvenida institucional',                                                       suggestedDay: '' },
+  { id: 'ev04', label: 'Taller 1 "Configuración básica de trámites externos y tesauros"',                suggestedDay: '' },
+  { id: 'ev05', label: 'Taller 2 "Gestiona Code"',                                                      suggestedDay: '' },
+  { id: 'ev06', label: 'Formación Expertos grupo esPublico "Migración de datos"',                        suggestedDay: '' },
+  { id: 'ev07', label: 'Tour por las instalaciones',                                                     suggestedDay: '' },
+  { id: 'ev08', label: 'Comida',                                                                         suggestedDay: '' },
+  { id: 'ev09', label: 'Teambuilding',                                                                   suggestedDay: '' },
+  { id: 'ev10', label: 'Cena',                                                                           suggestedDay: '' },
+  // Webinares 0–6
+  { id: 'w0',   label: 'Webinar 0 – Condición de usuario apoderado',                                    suggestedDay: '' },
+  { id: 'w1',   label: 'Webinar 1 – Contextualización del catálogo',                                    suggestedDay: '' },
+  { id: 'w2',   label: 'Webinar 2 – Configuración de campos personalizados',                             suggestedDay: '' },
+  { id: 'w3',   label: 'Webinar 3 – Construcción de documentos inteligentes',                            suggestedDay: '' },
+  { id: 'w4',   label: 'Webinar 4 – Circuito de Resolución Singular',                                   suggestedDay: '' },
+  { id: 'w5',   label: 'Webinar 5 – Circuito de Resolución Plural',                                     suggestedDay: '' },
+  { id: 'w6',   label: 'Webinar 6 – Simplificación administrativa',                                     suggestedDay: '' },
+  // Sesión 2 – bloque B
+  { id: 'ev11', label: 'Taller 3 "Construcción de documentos inteligentes"',                             suggestedDay: '' },
+  { id: 'ev12', label: 'Taller 4 "Circuito de resolución singular"',                                    suggestedDay: '' },
+  { id: 'ev13', label: 'Formación Expertos grupo esPublico "Arquitectura de interoperabilidad"',          suggestedDay: '' },
+  { id: 'ev14', label: 'Comida',                                                                         suggestedDay: '' },
+  { id: 'ev15', label: 'Taller 5 "Circuito de resolución plural"',                                      suggestedDay: '' },
+  // Sesión 2 – bloque C
+  { id: 'ev16', label: 'Taller 6 "Motor de tramitación Gestiona 360°"',                                 suggestedDay: '' },
+  { id: 'ev17', label: 'Visita cultural',                                                                suggestedDay: '' },
+  { id: 'ev18', label: 'Cena',                                                                           suggestedDay: '' },
+  // Sesión 2 – bloque D
+  { id: 'ev19', label: 'Introducción al módulo de diseño de control interno',                            suggestedDay: '' },
+  { id: 'ev20', label: 'Taller 7 "Búsquedas avanzadas de Gestiona"',                                   suggestedDay: '' },
+  { id: 'ev21', label: 'Formación Expertos esPublico: "Plataforma editorial de esPublico"',              suggestedDay: '' },
+  { id: 'ev22', label: 'Formación Expertos esPublico: "Cumplimiento normativo... y sus servicios"',      suggestedDay: '' },
+  // Webinares 7–10
+  { id: 'w7',   label: 'Webinar 7 – Módulo de diseño',                                                  suggestedDay: '' },
+  { id: 'w8',   label: 'Webinar 8 – Taller de Circuitos de Resolución con gasto',                       suggestedDay: '' },
+  { id: 'w9',   label: 'Webinar 9 – Taller de Búsquedas Avanzadas',                                     suggestedDay: '' },
+  { id: 'w10',  label: 'Webinar 10 – Taller de Analítica de datos',                                     suggestedDay: '' },
+  // Sesión 3 – bloque A
+  { id: 'ev23', label: 'Formación Expertos esPublico: "Módulo de Control Interno"',                      suggestedDay: '' },
+  { id: 'ev24', label: 'Taller 8: "Taller del módulo de diseño de control interno"',                    suggestedDay: '' },
+  { id: 'ev25', label: 'Formación Expertos esPublico: "Infraestructura de sistemas de Gestiona"',        suggestedDay: '' },
+  { id: 'ev26', label: 'Formación Expertos esPublico: "Ciberseguridad – SOC"',                          suggestedDay: '' },
+  { id: 'ev27', label: 'Comida',                                                                         suggestedDay: '' },
+  { id: 'ev28', label: 'Taller 9 "360° Tramitación de expedientes con gasto"',                          suggestedDay: '' },
+  // Sesión 3 – bloque B
+  { id: 'ev29', label: 'Taller 10 "Gestión de facturas"',                                               suggestedDay: '' },
+  { id: 'ev30', label: 'Taller 11 "Autoliquidaciones y liquidaciones tributarias"',                      suggestedDay: '' },
+  { id: 'ev31', label: 'Formación expertos esPublico: "Integraciones API"',                              suggestedDay: '' },
+  { id: 'ev32', label: 'Formación Expertos esPublico "Tecnología de testing y QA"',                      suggestedDay: '' },
+  { id: 'ev33', label: 'Comida',                                                                         suggestedDay: '' },
+  { id: 'ev34', label: 'Taller "Dinámica de Metodología de implantación"',                               suggestedDay: '' },
+  // Sesión 3 – bloque C
+  { id: 'ev35', label: 'Exposiciones dinámica metodología de implantación',                              suggestedDay: '' },
+  { id: 'ev36', label: 'Taller 12 "Creación de dashboards de analítica de datos"',                      suggestedDay: '' },
+  { id: 'ev37', label: 'Formación en habilidades interpersonales',                                       suggestedDay: '' },
+  { id: 'ev38', label: 'Comida',                                                                         suggestedDay: '' },
+  { id: 'ev39', label: 'Cena',                                                                           suggestedDay: '' },
+  // Sesión 3 – bloque D
+  { id: 'ev40', label: 'Proyecto de evaluación final',                                                   suggestedDay: '' },
+  { id: 'ev41', label: 'Formación expertos esPublico: "Analítica de datos"',                             suggestedDay: '' },
+  { id: 'ev42', label: 'Taller 13 "Personalización de cuadros de mando para tramitación reglada"',      suggestedDay: '' },
+  // Cierre
+  { id: 'cierre', label: 'Fecha fin evaluación final',                                                   suggestedDay: '' },
 ]
 
 export const TEMPLATE_EVENTS: TemplateEventDef[] = [
-  // KICKOFF Día 1
-  { slotId: 'kickoff1', Actividad: 'KICKOFF bienvenida / Inicio', Sesión: 'Online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '11:30' },
-  // KICKOFF Día 2
-  { slotId: 'kickoff2', Actividad: 'café bienvenida/demo plataforma formación', Sesión: 'online', Tipo: 'Online', 'Hora inicio': '10:00', 'Hora fin': '11:00' },
-  // Sesión 2 – Día 1
-  { slotId: 's2d1', Actividad: 'Bienvenida institucional', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '10:00' },
-  { slotId: 's2d1', Actividad: 'Taller 1 "Configuración básica de trámites externos y tesauros"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '10:00', 'Hora fin': '11:30' },
-  { slotId: 's2d1', Actividad: 'Taller 2 "Gestiona Code"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '12:00', 'Hora fin': '13:30' },
-  { slotId: 's2d1', Actividad: 'Formación Expertos grupo esPublico "Migración de datos"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '13:30', 'Hora fin': '14:30' },
-  { slotId: 's2d1', Actividad: 'Tour por las instalaciones', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '14:30', 'Hora fin': '' },
-  { slotId: 's2d1', Actividad: 'Comida', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '14:30', 'Hora fin': '16:30' },
-  { slotId: 's2d1', Actividad: 'Teambuilding', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '16:30', 'Hora fin': '18:30' },
-  { slotId: 's2d1', Actividad: 'Cena', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '20:30', 'Hora fin': '' },
-  // Sesión 2 – Día 2
-  { slotId: 's2d2', Actividad: 'Taller 3 "Construcción de documentos inteligentes"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '10:00' },
-  { slotId: 's2d2', Actividad: 'Taller 4 "Circuito de resolución singular"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '10:30', 'Hora fin': '13:00' },
-  { slotId: 's2d2', Actividad: 'Formación Expertos grupo esPublico "Arquitectura de interoperabilidad"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '13:00', 'Hora fin': '14:30' },
-  { slotId: 's2d2', Actividad: 'Comida', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '14:30', 'Hora fin': '16:30' },
-  { slotId: 's2d2', Actividad: 'Taller 5 "Circuito de resolución plural"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '16:30', 'Hora fin': '18:30' },
-  // Sesión 2 – Día 3
-  { slotId: 's2d3', Actividad: 'Taller 6 "Motor de tramitación Gestiona 360°"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '15:00' },
-  { slotId: 's2d3', Actividad: 'Visita cultural', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '18:30', 'Hora fin': '20:30' },
-  { slotId: 's2d3', Actividad: 'Cena', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '20:30', 'Hora fin': '' },
-  // Sesión 2 – Día 4
-  { slotId: 's2d4', Actividad: 'Introducción al módulo de diseño de control interno', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '10:00' },
-  { slotId: 's2d4', Actividad: 'Taller 7 "Búsquedas avanzadas de Gestiona"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '10:00', 'Hora fin': '11:00' },
-  { slotId: 's2d4', Actividad: 'Formación Expertos grupo esPublico: "Plataforma editorial de esPublico"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '11:30', 'Hora fin': '12:30' },
-  { slotId: 's2d4', Actividad: 'Formación Expertos grupo esPublico: "Cumplimiento normativo en el grupo esPublico"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '12:30', 'Hora fin': '13:30' },
-  // Sesión 3 – Día 1
-  { slotId: 's3d1', Actividad: 'Formación Expertos grupo esPublico: "Módulo de Control Interno"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '10:00' },
-  { slotId: 's3d1', Actividad: 'Taller 8: "Taller del módulo de diseño de control interno"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '10:00', 'Hora fin': '11:30' },
-  { slotId: 's3d1', Actividad: 'Formación Expertos grupo esPublico: "Infraestructura de sistemas de Gestiona"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '12:00', 'Hora fin': '13:00' },
-  { slotId: 's3d1', Actividad: 'Formación Expertos grupo esPublico: "Ciberseguridad – SOC"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '13:00', 'Hora fin': '14:00' },
-  { slotId: 's3d1', Actividad: 'Comida', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '14:00', 'Hora fin': '16:00' },
-  { slotId: 's3d1', Actividad: 'Taller 9 "360° Tramitación de expedientes con gasto"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '16:00', 'Hora fin': '18:00' },
-  // Sesión 3 – Día 2
-  { slotId: 's3d2', Actividad: 'Taller 10 "Gestión de facturas"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '11:00' },
-  { slotId: 's3d2', Actividad: 'Taller 11 "Autoliquidaciones y liquidaciones tributarias"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '11:30', 'Hora fin': '12:30' },
-  { slotId: 's3d2', Actividad: 'Formación expertos grupo esPublico: "Integraciones API"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '12:30', 'Hora fin': '13:30' },
-  { slotId: 's3d2', Actividad: 'Formación Expertos grupo esPublico "Tecnología de testing y QA"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '13:30', 'Hora fin': '14:30' },
-  { slotId: 's3d2', Actividad: 'Comida', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '14:30', 'Hora fin': '16:30' },
-  { slotId: 's3d2', Actividad: 'Taller "Dinámica de Metodología de implantación"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '16:30', 'Hora fin': '19:00' },
-  // Sesión 3 – Día 3
-  { slotId: 's3d3', Actividad: 'Exposiciones dinámica metodología de implantación', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '10:00' },
-  { slotId: 's3d3', Actividad: 'Taller 12 "Creación de dashboards de analítica de datos"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '10:00', 'Hora fin': '11:00' },
-  { slotId: 's3d3', Actividad: 'Formación en habilidades interpersonales', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '11:30', 'Hora fin': '14:30' },
-  { slotId: 's3d3', Actividad: 'Comida', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '14:30', 'Hora fin': '16:30' },
-  { slotId: 's3d3', Actividad: 'Cena', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '20:30', 'Hora fin': '' },
-  // Sesión 3 – Día 4
-  { slotId: 's3d4', Actividad: 'Proyecto de evaluación final', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '09:30' },
-  { slotId: 's3d4', Actividad: 'Formación expertos grupo esPublico: "Analítica de datos"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '09:30', 'Hora fin': '10:30' },
-  { slotId: 's3d4', Actividad: 'Taller 13 "Personalización de cuadros de mando para tramitación reglada"', Sesión: 'Sesión 3', Tipo: 'Presencial', 'Hora inicio': '11:00', 'Hora fin': '13:00' },
+  // Sesión 1
+  { slotId: 'ev01', Actividad: 'Kick off. Panorámica del proceso de certificación',                                              Sesión: 'Sesión 1',  Tipo: 'Online',     'Hora inicio': '10:00', 'Hora fin': '11:00' },
+  { slotId: 'ev02', Actividad: 'Bienvenida coffee online: demo plataforma de formación',                                         Sesión: 'Sesión 1',  Tipo: 'Online',     'Hora inicio': '10:00', 'Hora fin': '11:00' },
+  // Sesión 2 – bloque A
+  { slotId: 'ev03', Actividad: 'Bienvenida institucional',                                                                       Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '10:00' },
+  { slotId: 'ev04', Actividad: 'Taller 1 "Configuración básica de trámites externos y tesauros"',                                Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '10:00', 'Hora fin': '11:30' },
+  { slotId: 'ev05', Actividad: 'Taller 2 "Gestiona Code"',                                                                      Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '12:00', 'Hora fin': '13:30' },
+  { slotId: 'ev06', Actividad: 'Formación Expertos grupo esPublico "Migración de datos"',                                        Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '13:30', 'Hora fin': '14:30' },
+  { slotId: 'ev07', Actividad: 'Tour por las instalaciones',                                                                     Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '14:30', 'Hora fin': ''      },
+  { slotId: 'ev08', Actividad: 'Comida',                                                                                         Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '14:30', 'Hora fin': '16:30' },
+  { slotId: 'ev09', Actividad: 'Teambuilding',                                                                                   Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '16:30', 'Hora fin': '18:30' },
+  { slotId: 'ev10', Actividad: 'Cena',                                                                                           Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '20:30', 'Hora fin': ''      },
+  // Webinares 0–6
+  { slotId: 'w0',   Actividad: 'Webinar 0 Condición de usuario apoderado. Implicaciones y responsabilidades',                   Sesión: 'Online',    Tipo: 'Online',     'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  { slotId: 'w1',   Actividad: 'Webinar 1 Contextualización del catálogo',                                                      Sesión: 'Online',    Tipo: 'Online',     'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  { slotId: 'w2',   Actividad: 'Webinar 2 Configuración de campos personalizados',                                              Sesión: 'Online',    Tipo: 'Online',     'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  { slotId: 'w3',   Actividad: 'Webinar 3 Construcción de documentos inteligentes',                                             Sesión: 'Online',    Tipo: 'Online',     'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  { slotId: 'w4',   Actividad: 'Webinar 4 Circuito de Resolución Singular',                                                     Sesión: 'Online',    Tipo: 'Online',     'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  { slotId: 'w5',   Actividad: 'Webinar 5 Circuito de Resolución Plural',                                                       Sesión: 'Online',    Tipo: 'Online',     'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  { slotId: 'w6',   Actividad: 'Webinar 6 Simplificación administrativa',                                                       Sesión: 'Online',    Tipo: 'Online',     'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  // Sesión 2 – bloque B
+  { slotId: 'ev11', Actividad: 'Taller 3 "Construcción de documentos inteligentes"',                                            Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '10:00' },
+  { slotId: 'ev12', Actividad: 'Taller 4 "Circuito de resolución singular"',                                                    Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '10:30', 'Hora fin': '13:00' },
+  { slotId: 'ev13', Actividad: 'Formación Expertos grupo esPublico "Arquitectura de interoperabilidad"',                         Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '13:00', 'Hora fin': '14:30' },
+  { slotId: 'ev14', Actividad: 'Comida',                                                                                         Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '14:30', 'Hora fin': '16:30' },
+  { slotId: 'ev15', Actividad: 'Taller 5 "Circuito de resolución plural"',                                                      Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '16:30', 'Hora fin': '18:30' },
+  // Sesión 2 – bloque C
+  { slotId: 'ev16', Actividad: 'Taller 6 "Motor de tramitación Gestiona 360°"',                                                 Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '15:00' },
+  { slotId: 'ev17', Actividad: 'Visita cultural',                                                                                Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '18:30', 'Hora fin': '20:30' },
+  { slotId: 'ev18', Actividad: 'Cena',                                                                                           Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '20:30', 'Hora fin': ''      },
+  // Sesión 2 – bloque D
+  { slotId: 'ev19', Actividad: 'Introducción al módulo de diseño de control interno',                                            Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '10:00' },
+  { slotId: 'ev20', Actividad: 'Taller 7 "Búsquedas avanzadas de Gestiona"',                                                   Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '10:00', 'Hora fin': '11:00' },
+  { slotId: 'ev21', Actividad: 'Formación Expertos grupo esPublico: "Plataforma editorial de esPublico"',                        Sesión: 'Sesión 2',  Tipo: 'Presencial', 'Hora inicio': '11:30', 'Hora fin': '12:30' },
+  { slotId: 'ev22', Actividad: 'Formación Expertos grupo esPublico: "Cumplimiento normativo en el grupo esPublico y sus servicios"', Sesión: 'Sesión 2', Tipo: 'Presencial', 'Hora inicio': '12:30', 'Hora fin': '13:30' },
+  // Webinares 7–10
+  { slotId: 'w7',   Actividad: 'Webinar 7 Módulo de diseño',                                                                    Sesión: 'Online',    Tipo: 'Online',     'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  { slotId: 'w8',   Actividad: 'Webinar 8 Taller de Circuitos de Resolución con gasto',                                         Sesión: 'Online',    Tipo: 'Online',     'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  { slotId: 'w9',   Actividad: 'Webinar 9 Taller de Búsquedas Avanzadas. Conceptos y opciones disponibles.',                    Sesión: 'Online',    Tipo: 'Online',     'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  { slotId: 'w10',  Actividad: 'Webinar 10 Taller de Analítica de datos. Elementos básicos para la construcción de cuadros de mando', Sesión: 'Online', Tipo: 'Online',  'Hora inicio': '10:00', 'Hora fin': '12:00' },
+  // Sesión 3 – bloque A
+  { slotId: 'ev23', Actividad: 'Formación Expertos grupo esPublico: "Módulo de Control Interno"',                                Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '10:00' },
+  { slotId: 'ev24', Actividad: 'Taller 8: "Taller del módulo de diseño de control interno"',                                    Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '10:00', 'Hora fin': '11:30' },
+  { slotId: 'ev25', Actividad: 'Formación Expertos grupo esPublico: "Infraestructura de sistemas de Gestiona"',                  Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '12:00', 'Hora fin': '13:00' },
+  { slotId: 'ev26', Actividad: 'Formación Expertos grupo esPublico: "Ciberseguridad – SOC"',                                    Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '13:00', 'Hora fin': '14:00' },
+  { slotId: 'ev27', Actividad: 'Comida',                                                                                         Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '14:00', 'Hora fin': '16:00' },
+  { slotId: 'ev28', Actividad: 'Taller 9 "360° Tramitación de expedientes con gasto"',                                          Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '16:00', 'Hora fin': '18:00' },
+  // Sesión 3 – bloque B
+  { slotId: 'ev29', Actividad: 'Taller 10 "Gestión de facturas"',                                                               Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '11:00' },
+  { slotId: 'ev30', Actividad: 'Taller 11 "Autoliquidaciones y liquidaciones tributarias"',                                      Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '11:30', 'Hora fin': '12:30' },
+  { slotId: 'ev31', Actividad: 'Formación expertos grupo esPublico: "Integraciones API"',                                        Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '12:30', 'Hora fin': '13:30' },
+  { slotId: 'ev32', Actividad: 'Formación Expertos grupo esPublico "Tecnología de testing y QA"',                                Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '13:30', 'Hora fin': '14:30' },
+  { slotId: 'ev33', Actividad: 'Comida',                                                                                         Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '14:30', 'Hora fin': '16:30' },
+  { slotId: 'ev34', Actividad: 'Taller "Dinámica de Metodología de implantación"',                                               Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '16:30', 'Hora fin': '19:00' },
+  // Sesión 3 – bloque C
+  { slotId: 'ev35', Actividad: 'Exposiciones dinámica metodología de implantación',                                              Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '10:00' },
+  { slotId: 'ev36', Actividad: 'Taller 12 "Creación de dashboards de analítica de datos"',                                      Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '10:00', 'Hora fin': '11:00' },
+  { slotId: 'ev37', Actividad: 'Formación en habilidades interpersonales',                                                       Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '11:30', 'Hora fin': '14:30' },
+  { slotId: 'ev38', Actividad: 'Comida',                                                                                         Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '14:30', 'Hora fin': '16:30' },
+  { slotId: 'ev39', Actividad: 'Cena',                                                                                           Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '20:30', 'Hora fin': ''      },
+  // Sesión 3 – bloque D
+  { slotId: 'ev40', Actividad: 'Proyecto de evaluación final',                                                                   Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '09:00', 'Hora fin': '09:30' },
+  { slotId: 'ev41', Actividad: 'Formación expertos grupo esPublico: "Analítica de datos"',                                       Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '09:30', 'Hora fin': '10:30' },
+  { slotId: 'ev42', Actividad: 'Taller 13 "Personalización de cuadros de mando para tramitación reglada"',                      Sesión: 'Sesión 3',  Tipo: 'Presencial', 'Hora inicio': '11:00', 'Hora fin': '13:00' },
   // Cierre
-  { slotId: 'cierre', Actividad: 'Fecha fin evaluación final', Sesión: '', Tipo: 'Online', 'Hora inicio': '', 'Hora fin': '' },
+  { slotId: 'cierre', Actividad: 'Fecha fin evaluación final',                                                                   Sesión: 'Online',    Tipo: 'Online',     'Hora inicio': '',      'Hora fin': ''      },
 ]
 
 // ─── EventRow fields for mapping ────────────────────────────────────────────────
@@ -189,7 +256,7 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
   // Template tab state
   const [convName, setConvName] = useState('')
   const [slotDates, setSlotDates] = useState<Record<string, string>>({})
-  const [expandedSlots, setExpandedSlots] = useState<Set<string>>(new Set())
+
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
@@ -203,12 +270,6 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
   const [importError, setImportError] = useState<string | null>(null)
   const [importCount, setImportCount] = useState(0)
 
-  const toggleSlot = (id: string) =>
-    setExpandedSlots(prev => {
-      const s = new Set(prev)
-      s.has(id) ? s.delete(id) : s.add(id)
-      return s
-    })
 
   // ── Template save ──────────────────────────────────────────────────────────
   const handleSaveTemplate = async () => {
@@ -380,79 +441,51 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
                 />
               </div>
 
-              {/* Day slots */}
+              {/* Event slots – one row per event */}
               <div className="divide-y divide-white/5">
                 {DAY_SLOTS.map(slot => {
-                  const events = slotEventsMap[slot.id] ?? []
-                  const isExpanded = expandedSlots.has(slot.id)
+                  const ev = slotEventsMap[slot.id]?.[0]
                   const dateVal = slotDates[slot.id] ?? ''
                   const hasDate = !!dateVal
+                  const isPresencial = ev?.Tipo?.toLowerCase().includes('presencial')
 
                   return (
-                    <div key={slot.id} className="group">
-                      {/* Slot row */}
-                      <div className="flex items-center gap-3 px-5 py-3 hover:bg-white/[0.02] transition-all">
-                        {/* Expand toggle */}
-                        <button
-                          onClick={() => toggleSlot(slot.id)}
-                          className="text-white/30 hover:text-white/60 transition-all flex-shrink-0"
-                        >
-                          {isExpanded
-                            ? <ChevronDown className="w-4 h-4" />
-                            : <ChevronRight className="w-4 h-4" />}
-                        </button>
+                    <div key={slot.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/[0.02] transition-all">
+                      {/* Tipo badge */}
+                      <span className={cn(
+                        'text-[10px] px-1.5 py-0.5 rounded flex-shrink-0 w-16 text-center',
+                        isPresencial
+                          ? 'bg-amber-500/15 text-amber-400'
+                          : 'bg-cyan-500/15 text-cyan-400'
+                      )}>
+                        {isPresencial ? 'Presencial' : 'Online'}
+                      </span>
 
-                        {/* Slot label */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-white/80 text-sm font-medium">{slot.label}</span>
-                            {slot.suggestedDay && (
-                              <span className="text-white/25 text-xs">({slot.suggestedDay})</span>
-                            )}
-                          </div>
-                          <span className="text-white/30 text-xs">{events.length} evento{events.length !== 1 ? 's' : ''}</span>
-                        </div>
-
-                        {/* Date input */}
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          {hasDate && <Check className="w-3.5 h-3.5 text-emerald-400" />}
-                          <input
-                            type="date"
-                            value={dateVal}
-                            onChange={e => setSlotDates(prev => ({ ...prev, [slot.id]: e.target.value }))}
-                            onClick={e => e.stopPropagation()}
-                            className="input-field text-xs py-1.5 w-36"
-                          />
+                      {/* Activity + meta */}
+                      <div className="flex-1 min-w-0">
+                        <span className="text-white/80 text-xs font-medium block truncate">{slot.label}</span>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          {ev?.Sesión && (
+                            <span className="text-white/30 text-[10px]">{ev.Sesión}</span>
+                          )}
+                          {(ev?.['Hora inicio'] || ev?.['Hora fin']) && (
+                            <span className="text-white/30 text-[10px] font-mono">
+                              {ev['Hora inicio'] || '—'}{ev['Hora fin'] ? ` – ${ev['Hora fin']}` : ''}
+                            </span>
+                          )}
                         </div>
                       </div>
 
-                      {/* Expanded events */}
-                      {isExpanded && (
-                        <div className="bg-white/[0.02] border-t border-white/5 px-5 py-2 space-y-1">
-                          {events.map((ev, i) => (
-                            <div key={i} className="flex items-center gap-3 py-1.5 border-b border-white/[0.04] last:border-0">
-                              <div className="flex-1 min-w-0">
-                                <span className="text-white/70 text-xs block truncate">{ev.Actividad}</span>
-                                <div className="flex gap-2 mt-0.5">
-                                  {ev.Sesión && (
-                                    <span className="text-white/30 text-[10px]">{ev.Sesión}</span>
-                                  )}
-                                  <span className={cn(
-                                    'text-[10px] px-1.5 py-0 rounded',
-                                    ev.Tipo?.toLowerCase().includes('presencial')
-                                      ? 'bg-amber-500/15 text-amber-400'
-                                      : 'bg-cyan-500/15 text-cyan-400'
-                                  )}>{ev.Tipo}</span>
-                                </div>
-                              </div>
-                              <div className="text-white/40 text-[10px] font-mono flex-shrink-0 text-right">
-                                {ev['Hora inicio'] || '—'}
-                                {ev['Hora fin'] && ` – ${ev['Hora fin']}`}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      {/* Date input */}
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        {hasDate && <Check className="w-3 h-3 text-emerald-400" />}
+                        <input
+                          type="date"
+                          value={dateVal}
+                          onChange={e => setSlotDates(prev => ({ ...prev, [slot.id]: e.target.value }))}
+                          className="input-field text-xs py-1 w-34"
+                        />
+                      </div>
                     </div>
                   )
                 })}
