@@ -381,30 +381,30 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-white/10 flex-shrink-0">
+        <div className="flex items-center justify-between p-5 border-b border-slate-200 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-emerald-400" />
+            <div className="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
-              <h2 className="text-white font-semibold text-lg">Crear Convocatoria</h2>
-              <p className="text-white/40 text-xs">Desde plantilla o importar Excel</p>
+              <h2 className="text-slate-800 font-semibold text-lg">Crear Convocatoria</h2>
+              <p className="text-slate-400 text-xs">Desde plantilla o importar Excel</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-white/50 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-all">
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-all">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-white/10 flex-shrink-0">
+        <div className="flex border-b border-slate-200 flex-shrink-0">
           <button
             onClick={() => setActiveTab('template')}
             className={cn(
               'flex-1 py-3 text-sm font-medium transition-all flex items-center justify-center gap-2',
               activeTab === 'template'
-                ? 'text-emerald-300 border-b-2 border-emerald-400 bg-emerald-500/5'
-                : 'text-white/40 hover:text-white/70'
+                ? 'text-emerald-700 border-b-2 border-emerald-500 bg-emerald-50'
+                : 'text-slate-400 hover:text-slate-600'
             )}
           >
             <Calendar className="w-4 h-4" /> Desde Plantilla
@@ -414,8 +414,8 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
             className={cn(
               'flex-1 py-3 text-sm font-medium transition-all flex items-center justify-center gap-2',
               activeTab === 'excel'
-                ? 'text-emerald-300 border-b-2 border-emerald-400 bg-emerald-500/5'
-                : 'text-white/40 hover:text-white/70'
+                ? 'text-emerald-700 border-b-2 border-emerald-500 bg-emerald-50'
+                : 'text-slate-400 hover:text-slate-600'
             )}
           >
             <FileSpreadsheet className="w-4 h-4" /> Cargar Excel
@@ -427,8 +427,8 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
           <>
             <div className="flex-1 overflow-y-auto">
               {/* Convocatoria name */}
-              <div className="p-5 border-b border-white/5">
-                <label className="text-white/50 text-xs mb-1.5 block uppercase tracking-wider">
+              <div className="p-5 border-b border-slate-100">
+                <label className="text-slate-500 text-xs mb-1.5 block uppercase tracking-wider">
                   Nombre de la Convocatoria
                 </label>
                 <input
@@ -442,7 +442,7 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
               </div>
 
               {/* Event slots – one row per event */}
-              <div className="divide-y divide-white/5">
+              <div className="divide-y divide-slate-100">
                 {DAY_SLOTS.map(slot => {
                   const ev = slotEventsMap[slot.id]?.[0]
                   const dateVal = slotDates[slot.id] ?? ''
@@ -450,26 +450,26 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
                   const isPresencial = ev?.Tipo?.toLowerCase().includes('presencial')
 
                   return (
-                    <div key={slot.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/[0.02] transition-all">
+                    <div key={slot.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-all">
                       {/* Tipo badge */}
                       <span className={cn(
                         'text-[10px] px-1.5 py-0.5 rounded flex-shrink-0 w-16 text-center',
                         isPresencial
-                          ? 'bg-amber-500/15 text-amber-400'
-                          : 'bg-cyan-500/15 text-cyan-400'
+                          ? 'bg-amber-50 text-amber-700'
+                          : 'bg-cyan-50 text-cyan-700'
                       )}>
                         {isPresencial ? 'Presencial' : 'Online'}
                       </span>
 
                       {/* Activity + meta */}
                       <div className="flex-1 min-w-0">
-                        <span className="text-white/80 text-xs font-medium block truncate">{slot.label}</span>
+                        <span className="text-slate-700 text-xs font-medium block truncate">{slot.label}</span>
                         <div className="flex items-center gap-2 mt-0.5">
                           {ev?.Sesión && (
-                            <span className="text-white/30 text-[10px]">{ev.Sesión}</span>
+                            <span className="text-slate-400 text-[10px]">{ev.Sesión}</span>
                           )}
                           {(ev?.['Hora inicio'] || ev?.['Hora fin']) && (
-                            <span className="text-white/30 text-[10px] font-mono">
+                            <span className="text-slate-400 text-[10px] font-mono">
                               {ev['Hora inicio'] || '—'}{ev['Hora fin'] ? ` – ${ev['Hora fin']}` : ''}
                             </span>
                           )}
@@ -478,7 +478,7 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
 
                       {/* Date input */}
                       <div className="flex items-center gap-1.5 flex-shrink-0">
-                        {hasDate && <Check className="w-3 h-3 text-emerald-400" />}
+                        {hasDate && <Check className="w-3 h-3 text-emerald-500" />}
                         <input
                           type="date"
                           value={dateVal}
@@ -493,15 +493,15 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
             </div>
 
             {/* Footer */}
-            <div className="flex-shrink-0 border-t border-white/10 p-5">
+            <div className="flex-shrink-0 border-t border-slate-200 p-5">
               {saveError && (
-                <div className="mb-3 bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm flex items-center gap-2">
+                <div className="mb-3 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                   {saveError}
                 </div>
               )}
               <div className="flex items-center gap-3">
-                <div className="flex-1 text-white/30 text-xs">
+                <div className="flex-1 text-slate-400 text-xs">
                   {assignedCount}/{DAY_SLOTS.length} días con fecha asignada · {TEMPLATE_EVENTS.length} eventos
                 </div>
                 <button onClick={onClose} className="btn-secondary px-4 py-2 text-sm">
@@ -537,15 +537,15 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
                   className={cn(
                     'border-2 border-dashed rounded-2xl p-12 flex flex-col items-center gap-4 cursor-pointer transition-all',
                     isDragging
-                      ? 'border-emerald-400/60 bg-emerald-500/10'
-                      : 'border-white/20 hover:border-white/40 hover:bg-white/5'
+                      ? 'border-emerald-400 bg-emerald-50'
+                      : 'border-slate-300 hover:border-slate-400 hover:bg-slate-50'
                   )}
                 >
-                  <FileSpreadsheet className={cn('w-12 h-12', isDragging ? 'text-emerald-400' : 'text-white/20')} />
+                  <FileSpreadsheet className={cn('w-12 h-12', isDragging ? 'text-emerald-500' : 'text-slate-300')} />
                   <div className="text-center">
-                    <p className="text-white/70 text-sm font-medium">Arrastra tu archivo aquí</p>
-                    <p className="text-white/30 text-xs mt-1">o haz clic para seleccionar</p>
-                    <p className="text-white/20 text-xs mt-2">.xlsx · .xls · .csv</p>
+                    <p className="text-slate-600 text-sm font-medium">Arrastra tu archivo aquí</p>
+                    <p className="text-slate-400 text-xs mt-1">o haz clic para seleccionar</p>
+                    <p className="text-slate-400 text-xs mt-2">.xlsx · .xls · .csv</p>
                   </div>
                   <input
                     ref={fileInputRef}
@@ -562,14 +562,14 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-white/80 text-sm font-medium">Confirmar mapeo de columnas</p>
-                      <p className="text-white/40 text-xs mt-0.5">
+                      <p className="text-slate-700 text-sm font-medium">Confirmar mapeo de columnas</p>
+                      <p className="text-slate-400 text-xs mt-0.5">
                         {parsedRows.length} filas detectadas · Ajusta las correspondencias si es necesario
                       </p>
                     </div>
                     <button
                       onClick={() => { setImportStep('upload'); setParsedHeaders([]); setParsedRows([]) }}
-                      className="text-xs text-white/40 hover:text-white/70 border border-white/10 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all"
+                      className="text-xs text-slate-400 hover:text-slate-600 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-all"
                     >
                       Cambiar archivo
                     </button>
@@ -577,16 +577,16 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
 
                   <div className="space-y-2">
                     {parsedHeaders.map(header => (
-                      <div key={header} className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3">
+                      <div key={header} className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
                         <div className="flex-1 min-w-0">
-                          <span className="text-white/70 text-sm font-medium truncate block">{header}</span>
-                          <span className="text-white/25 text-xs">
+                          <span className="text-slate-600 text-sm font-medium truncate block">{header}</span>
+                          <span className="text-slate-400 text-xs">
                             {parsedRows[0]?.[header]
                               ? `Ej: "${String(parsedRows[0][header]).slice(0, 40)}"`
                               : 'Sin datos de muestra'}
                           </span>
                         </div>
-                        <span className="text-white/20 text-sm flex-shrink-0">→</span>
+                        <span className="text-slate-400 text-sm flex-shrink-0">→</span>
                         <select
                           value={columnMapping[header] ?? ''}
                           onChange={e => setColumnMapping(prev => ({ ...prev, [header]: e.target.value as keyof EventRow | '' }))}
@@ -598,7 +598,7 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
                           ))}
                         </select>
                         {columnMapping[header] && (
-                          <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                          <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                         )}
                       </div>
                     ))}
@@ -609,26 +609,26 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
               {/* STEP: Importing */}
               {importStep === 'importing' && (
                 <div className="flex flex-col items-center justify-center py-16 gap-4">
-                  <RefreshCw className="w-10 h-10 text-emerald-400 animate-spin" />
-                  <p className="text-white/60 text-sm">Importando datos...</p>
+                  <RefreshCw className="w-10 h-10 text-emerald-500 animate-spin" />
+                  <p className="text-slate-600 text-sm">Importando datos...</p>
                 </div>
               )}
 
               {/* STEP: Done */}
               {importStep === 'done' && (
                 <div className="flex flex-col items-center justify-center py-16 gap-4">
-                  <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center">
-                    <Check className="w-8 h-8 text-emerald-400" />
+                  <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center">
+                    <Check className="w-8 h-8 text-emerald-600" />
                   </div>
                   <div className="text-center">
-                    <p className="text-white/80 text-base font-medium">¡Importación completada!</p>
-                    <p className="text-white/40 text-sm mt-1">{importCount} evento{importCount !== 1 ? 's' : ''} importado{importCount !== 1 ? 's' : ''} correctamente</p>
+                    <p className="text-slate-700 text-base font-medium">¡Importación completada!</p>
+                    <p className="text-slate-400 text-sm mt-1">{importCount} evento{importCount !== 1 ? 's' : ''} importado{importCount !== 1 ? 's' : ''} correctamente</p>
                   </div>
                 </div>
               )}
 
               {importError && (
-                <div className="mt-4 bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm flex items-center gap-2">
+                <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                   {importError}
                 </div>
@@ -636,7 +636,7 @@ export default function CreateConvocatoriaModal({ onClose, onSuccess }: Props) {
             </div>
 
             {/* Footer */}
-            <div className="flex-shrink-0 border-t border-white/10 p-5 flex justify-end gap-3">
+            <div className="flex-shrink-0 border-t border-slate-200 p-5 flex justify-end gap-3">
               {importStep === 'done' ? (
                 <button
                   onClick={() => { onSuccess(); onClose() }}

@@ -47,17 +47,17 @@ export default function CreateGestionaEventModal({ onClose, onSuccess }: Props) 
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-white/10">
+        <div className="flex items-center justify-between p-5 border-b border-slate-200">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-red-500/20 rounded-xl flex items-center justify-center">
+            <div className="w-8 h-8 bg-red-50 rounded-xl flex items-center justify-center">
               <span
                 className="w-4 h-4 bg-red-400"
                 style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
               />
             </div>
-            <h2 className="text-white font-semibold">Nuevo Evento Gestiona</h2>
+            <h2 className="text-slate-800 font-semibold">Nuevo Evento Gestiona</h2>
           </div>
-          <button onClick={onClose} className="text-white/50 hover:text-white p-1 rounded-lg hover:bg-white/10">
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -66,7 +66,7 @@ export default function CreateGestionaEventModal({ onClose, onSuccess }: Props) 
         <div className="p-5 space-y-4">
           {/* Nombre */}
           <div>
-            <label className="text-white/40 text-xs mb-1 block">Nombre</label>
+            <label className="text-slate-400 text-xs mb-1 block">Nombre</label>
             <input
               type="text"
               value={nombre}
@@ -78,7 +78,7 @@ export default function CreateGestionaEventModal({ onClose, onSuccess }: Props) 
 
           {/* Emplazamiento */}
           <div>
-            <label className="text-white/40 text-xs mb-1 flex items-center gap-1.5">
+            <label className="text-slate-400 text-xs mb-1 flex items-center gap-1.5">
               <MapPin className="w-3 h-3" /> Emplazamiento
             </label>
             <input
@@ -93,7 +93,7 @@ export default function CreateGestionaEventModal({ onClose, onSuccess }: Props) 
           {/* Fechas */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-white/40 text-xs mb-1 flex items-center gap-1.5">
+              <label className="text-slate-400 text-xs mb-1 flex items-center gap-1.5">
                 <Calendar className="w-3 h-3" /> Fecha inicio
               </label>
               <input
@@ -104,7 +104,7 @@ export default function CreateGestionaEventModal({ onClose, onSuccess }: Props) 
               />
             </div>
             <div>
-              <label className="text-white/40 text-xs mb-1 flex items-center gap-1.5">
+              <label className="text-slate-400 text-xs mb-1 flex items-center gap-1.5">
                 <Calendar className="w-3 h-3" /> Fecha fin
               </label>
               <input
@@ -117,21 +117,21 @@ export default function CreateGestionaEventModal({ onClose, onSuccess }: Props) 
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm">
               {error}
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 p-5 border-t border-white/10">
+        <div className="flex gap-3 p-5 border-t border-slate-200">
           <button onClick={onClose} className="btn-secondary flex-1">
             Cancelar
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 transition-all disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-red-600 text-white border border-red-600 hover:bg-red-700 transition-all disabled:opacity-50"
           >
             {saving ? (
               <><RefreshCw className="w-4 h-4 animate-spin" /> Guardando...</>

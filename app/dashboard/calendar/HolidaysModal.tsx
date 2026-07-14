@@ -116,33 +116,33 @@ export default function HolidaysModal({
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-white/10 flex-shrink-0">
+        <div className="flex items-center justify-between p-5 border-b border-slate-200 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-red-500/20 rounded-xl flex items-center justify-center">
-              <Star className="w-4 h-4 text-red-400" />
+            <div className="w-8 h-8 bg-red-50 rounded-xl flex items-center justify-center">
+              <Star className="w-4 h-4 text-red-600" />
             </div>
             <div>
-              <h2 className="text-white font-semibold">Días Festivos</h2>
-              <p className="text-white/40 text-xs">Configura los festivos por año</p>
+              <h2 className="text-slate-800 font-semibold">Días Festivos</h2>
+              <p className="text-slate-400 text-xs">Configura los festivos por año</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-white/50 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-all">
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-all">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Year selector */}
-        <div className="px-5 py-3 border-b border-white/10 flex items-center gap-3 flex-shrink-0">
+        <div className="px-5 py-3 border-b border-slate-200 flex items-center gap-3 flex-shrink-0">
           <button
             onClick={() => setYear(y => y - 1)}
-            className="text-white/50 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-all"
+            className="text-slate-500 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-all"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-white font-semibold text-lg flex-1 text-center">{year}</span>
+          <span className="text-slate-800 font-semibold text-lg flex-1 text-center">{year}</span>
           <button
             onClick={() => setYear(y => y + 1)}
-            className="text-white/50 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-all"
+            className="text-slate-500 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-all"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -152,18 +152,18 @@ export default function HolidaysModal({
         <div className="flex-1 overflow-y-auto p-5 space-y-2 min-h-0">
           {loading ? (
             <div className="flex items-center justify-center py-10">
-              <RefreshCw className="w-5 h-5 text-brand-400 animate-spin" />
+              <RefreshCw className="w-5 h-5 text-brand-600 animate-spin" />
             </div>
           ) : holidays.length === 0 ? (
             <div className="text-center py-10 space-y-2">
-              <Star className="w-8 h-8 text-white/10 mx-auto" />
-              <p className="text-white/30 text-sm">No hay festivos configurados para {year}</p>
+              <Star className="w-8 h-8 text-slate-300 mx-auto" />
+              <p className="text-slate-400 text-sm">No hay festivos configurados para {year}</p>
             </div>
           ) : (
             holidays.map(h => (
               <div
                 key={h.ID}
-                className="flex items-center justify-between gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5"
+                className="flex items-center justify-between gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5"
               >
                 <div className="flex items-center gap-3">
                   <div
@@ -171,14 +171,14 @@ export default function HolidaysModal({
                     style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                   />
                   <div>
-                    <p className="text-red-200 text-sm font-medium">{h.Actividad}</p>
-                    <p className="text-white/40 text-xs">{h['Día']}</p>
+                    <p className="text-red-700 text-sm font-medium">{h.Actividad}</p>
+                    <p className="text-slate-400 text-xs">{h['Día']}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => h.ID && handleDelete(h.ID)}
                   disabled={deleting === h.ID}
-                  className="text-red-400/50 hover:text-red-300 p-1.5 rounded-lg hover:bg-red-500/20 transition-all disabled:opacity-40"
+                  className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-100 transition-all disabled:opacity-40"
                 >
                   {deleting === h.ID
                     ? <RefreshCw className="w-4 h-4 animate-spin" />
@@ -191,8 +191,8 @@ export default function HolidaysModal({
         </div>
 
         {/* Add form */}
-        <div className="p-5 border-t border-white/10 flex-shrink-0 space-y-3">
-          <p className="text-white/40 text-xs uppercase tracking-wider">Añadir festivo</p>
+        <div className="p-5 border-t border-slate-200 flex-shrink-0 space-y-3">
+          <p className="text-slate-400 text-xs uppercase tracking-wider">Añadir festivo</p>
           <div className="flex gap-2">
             <input
               type="date"
@@ -212,7 +212,7 @@ export default function HolidaysModal({
             />
           </div>
           {error && (
-            <p className="text-red-400 text-xs">{error}</p>
+            <p className="text-red-600 text-xs">{error}</p>
           )}
           <button
             onClick={handleAdd}
