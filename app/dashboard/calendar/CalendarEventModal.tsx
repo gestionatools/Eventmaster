@@ -146,9 +146,9 @@ export default function CalendarEventModal({ existingEvents, colorMap, onClose, 
       <div className="relative glass-card w-full max-w-7xl mx-4 my-4 flex flex-col overflow-hidden rounded-2xl">
 
         {/* ── Header ── */}
-        <div className="flex items-center gap-3 px-5 py-3 border-b border-white/10 flex-shrink-0">
+        <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-200 flex-shrink-0">
           <Calendar className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-          <h2 className="text-white font-semibold text-base whitespace-nowrap">Nueva Convocatoria</h2>
+          <h2 className="text-slate-800 font-semibold text-base whitespace-nowrap">Nueva Convocatoria</h2>
 
           <input
             type="text"
@@ -161,18 +161,18 @@ export default function CalendarEventModal({ existingEvents, colorMap, onClose, 
           <div className="flex-1" />
 
           {/* View toggle */}
-          <div className="flex items-center bg-white/5 rounded-xl p-1 gap-1 flex-shrink-0">
+          <div className="flex items-center bg-slate-50 rounded-xl p-1 gap-1 flex-shrink-0">
             <button
               onClick={() => setViewMode('month')}
               className={cn('px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5',
-                viewMode === 'month' ? 'bg-brand-500/30 text-brand-300' : 'text-white/40 hover:text-white/70')}
+                viewMode === 'month' ? 'bg-brand-50 text-brand-700' : 'text-slate-400 hover:text-slate-600')}
             >
               <CalendarDays className="w-3.5 h-3.5" /> Mes
             </button>
             <button
               onClick={() => setViewMode('year')}
               className={cn('px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5',
-                viewMode === 'year' ? 'bg-brand-500/30 text-brand-300' : 'text-white/40 hover:text-white/70')}
+                viewMode === 'year' ? 'bg-brand-50 text-brand-700' : 'text-slate-400 hover:text-slate-600')}
             >
               <Calendar className="w-3.5 h-3.5" /> Año
             </button>
@@ -180,18 +180,18 @@ export default function CalendarEventModal({ existingEvents, colorMap, onClose, 
 
           {/* Navigation */}
           <div className="flex items-center gap-1 flex-shrink-0">
-            <button onClick={goBack} className="p-1.5 rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-all">
+            <button onClick={goBack} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-all">
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="text-white/80 text-sm font-medium min-w-[9rem] text-center">
+            <span className="text-slate-700 text-sm font-medium min-w-[9rem] text-center">
               {viewMode === 'year' ? year : `${MONTHS_ES[month]} ${year}`}
             </span>
-            <button onClick={goForward} className="p-1.5 rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-all">
+            <button onClick={goForward} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-all">
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
 
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-all ml-1 flex-shrink-0">
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-all ml-1 flex-shrink-0">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -226,14 +226,14 @@ export default function CalendarEventModal({ existingEvents, colorMap, onClose, 
           </div>
 
           {/* ── Template slots sidebar ── */}
-          <div className="w-72 border-l border-white/10 flex flex-col flex-shrink-0 overflow-hidden">
+          <div className="w-72 border-l border-slate-200 flex flex-col flex-shrink-0 overflow-hidden">
             {/* Sidebar header */}
-            <div className="px-4 py-3 border-b border-white/10 flex-shrink-0">
+            <div className="px-4 py-3 border-b border-slate-200 flex-shrink-0">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-white/50 text-xs uppercase tracking-wider">Plantilla</span>
-                <span className="text-white/40 text-xs">{assignedCount}/{DAY_SLOTS.length}</span>
+                <span className="text-slate-500 text-xs uppercase tracking-wider">Plantilla</span>
+                <span className="text-slate-400 text-xs">{assignedCount}/{DAY_SLOTS.length}</span>
               </div>
-              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-slate-50 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-emerald-500 rounded-full transition-all duration-300"
                   style={{ width: `${(assignedCount / DAY_SLOTS.length) * 100}%` }}
@@ -253,10 +253,10 @@ export default function CalendarEventModal({ existingEvents, colorMap, onClose, 
                     className={cn(
                       'w-full text-left px-3 py-2 rounded-lg text-xs transition-all flex items-start gap-2 border',
                       isSelected
-                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                         : assigned
-                        ? 'bg-white/5 text-white/60 border-white/10 hover:bg-white/8'
-                        : 'bg-transparent text-white/35 border-transparent hover:bg-white/5 hover:text-white/55'
+                        ? 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                        : 'bg-transparent text-slate-400 border-transparent hover:bg-slate-100 hover:text-slate-600'
                     )}
                   >
                     {/* Status dot */}
@@ -265,8 +265,8 @@ export default function CalendarEventModal({ existingEvents, colorMap, onClose, 
                       assigned
                         ? 'bg-emerald-500'
                         : isSelected
-                        ? 'ring-2 ring-emerald-400 bg-emerald-500/30 animate-pulse'
-                        : 'bg-white/10'
+                        ? 'ring-2 ring-emerald-400 bg-emerald-100 animate-pulse'
+                        : 'bg-slate-100'
                     )}>
                       {assigned && <Check className="w-2.5 h-2.5 text-white" />}
                     </span>
@@ -290,7 +290,7 @@ export default function CalendarEventModal({ existingEvents, colorMap, onClose, 
                     {assigned && (
                       <button
                         onClick={e => { e.stopPropagation(); removeSlot(slot.id) }}
-                        className="flex-shrink-0 mt-0.5 text-white/20 hover:text-red-400 transition-colors"
+                        className="flex-shrink-0 mt-0.5 text-slate-400 hover:text-red-400 transition-colors"
                         title="Quitar fecha"
                       >
                         <X className="w-3 h-3" />
@@ -304,11 +304,11 @@ export default function CalendarEventModal({ existingEvents, colorMap, onClose, 
         </div>
 
         {/* ── Footer ── */}
-        <div className="flex items-center gap-4 px-5 py-3 border-t border-white/10 flex-shrink-0">
+        <div className="flex items-center gap-4 px-5 py-3 border-t border-slate-200 flex-shrink-0">
           {saveError ? (
-            <p className="text-red-400 text-sm">{saveError}</p>
+            <p className="text-red-700 text-sm">{saveError}</p>
           ) : (
-            <p className="text-white/30 text-xs truncate flex-1">
+            <p className="text-slate-400 text-xs truncate flex-1">
               {selectedSlot
                 ? `Haz clic en un día para asignar: ${selectedSlotLabel}`
                 : 'Selecciona un bloque de la plantilla'}
@@ -362,7 +362,7 @@ function MonthGrid({
       {/* Day headers */}
       <div className="grid grid-cols-7 mb-1">
         {DAYS_ES.map(d => (
-          <div key={d} className="text-center text-xs text-white/25 py-1 font-medium">{d}</div>
+          <div key={d} className="text-center text-xs text-slate-400 py-1 font-medium">{d}</div>
         ))}
       </div>
 
@@ -385,17 +385,17 @@ function MonthGrid({
               className={cn(
                 'h-16 rounded-lg p-1.5 flex flex-col items-center transition-all border group',
                 isTarget
-                  ? 'bg-emerald-500/25 border-emerald-400/50 shadow-[0_0_0_2px_rgba(52,211,153,0.3)]'
+                  ? 'bg-emerald-100 border-emerald-300 shadow-[0_0_0_2px_rgba(52,211,153,0.3)]'
                   : newSlots.length > 0
-                  ? 'bg-emerald-500/10 border-emerald-500/20'
+                  ? 'bg-emerald-50 border-emerald-100'
                   : isToday
-                  ? 'bg-brand-500/20 border-brand-500/30'
-                  : 'bg-white/[0.03] border-white/5 hover:bg-white/8 hover:border-emerald-500/30'
+                  ? 'bg-brand-50 border-brand-200'
+                  : 'bg-slate-50 border-slate-100 hover:bg-slate-100 hover:border-emerald-300'
               )}
             >
               <span className={cn(
                 'text-sm font-medium leading-none',
-                isTarget ? 'text-emerald-300' : isToday ? 'text-brand-300' : 'text-white/70 group-hover:text-white/90'
+                isTarget ? 'text-emerald-700' : isToday ? 'text-brand-700' : 'text-slate-600 group-hover:text-slate-700'
               )}>
                 {day}
               </span>
@@ -408,13 +408,13 @@ function MonthGrid({
                     return (
                       <span
                         key={j}
-                        className={cn('w-1.5 h-1.5 rounded-full opacity-50', col?.dot ?? 'bg-white/20')}
+                        className={cn('w-1.5 h-1.5 rounded-full opacity-50', col?.dot ?? 'bg-slate-300')}
                         title={ev.Convocatoria ?? ''}
                       />
                     )
                   })}
                   {existing.length > 5 && (
-                    <span className="text-white/20 text-[8px] leading-none">+{existing.length - 5}</span>
+                    <span className="text-slate-400 text-[8px] leading-none">+{existing.length - 5}</span>
                   )}
                 </div>
               )}
@@ -426,7 +426,7 @@ function MonthGrid({
                     const slot = DAY_SLOTS.find(s => s.id === slotId)
                     const label = slot?.label.split('–')[0].trim() ?? ''
                     return (
-                      <div key={slotId} className="text-[8px] text-emerald-300 truncate text-center leading-tight bg-emerald-500/20 rounded px-0.5">
+                      <div key={slotId} className="text-[8px] text-emerald-700 truncate text-center leading-tight bg-emerald-50 rounded px-0.5">
                         {label}
                       </div>
                     )
@@ -497,11 +497,11 @@ function MiniMonthGrid({
   ]
 
   return (
-    <div className="bg-white/[0.03] rounded-xl p-3 border border-white/8">
-      <h3 className="text-white/60 text-xs font-medium text-center mb-2">{MONTHS_ES[month]}</h3>
+    <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
+      <h3 className="text-slate-600 text-xs font-medium text-center mb-2">{MONTHS_ES[month]}</h3>
       <div className="grid grid-cols-7 mb-1">
         {DAYS_ES.map(d => (
-          <div key={d} className="text-center text-[9px] text-white/20 font-medium">{d}</div>
+          <div key={d} className="text-center text-[9px] text-slate-400 font-medium">{d}</div>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-px">
@@ -525,21 +525,21 @@ function MiniMonthGrid({
               className={cn(
                 'aspect-square rounded flex items-center justify-center text-[10px] font-medium transition-all relative',
                 isTarget
-                  ? 'bg-emerald-500/40 text-emerald-200 ring-1 ring-emerald-400'
+                  ? 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-400'
                   : newSlots.length > 0
-                  ? 'bg-emerald-500/20 text-emerald-300'
+                  ? 'bg-emerald-50 text-emerald-700'
                   : isToday
-                  ? 'bg-brand-500/30 text-brand-300'
+                  ? 'bg-brand-50 text-brand-700'
                   : existing.length > 0
-                  ? 'text-white/70 hover:bg-emerald-500/20 hover:text-emerald-300'
-                  : 'text-white/35 hover:bg-white/8 hover:text-white/70'
+                  ? 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'
+                  : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'
               )}
               title={`${day} ${MONTHS_ES[month]} ${year}`}
             >
               {day}
               {/* Event indicator dot */}
               {existing.length > 0 && !isTarget && !newSlots.length && (
-                <span className={cn('absolute bottom-0 right-0 w-1 h-1 rounded-full', dotColor || 'bg-white/30')} />
+                <span className={cn('absolute bottom-0 right-0 w-1 h-1 rounded-full', dotColor || 'bg-slate-300')} />
               )}
               {newSlots.length > 0 && (
                 <span className="absolute bottom-0 right-0 w-1 h-1 rounded-full bg-emerald-400" />

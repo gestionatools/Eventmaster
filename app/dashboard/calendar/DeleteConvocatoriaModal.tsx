@@ -59,17 +59,17 @@ export default function DeleteConvocatoriaModal({
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-white/10">
+        <div className="flex items-center justify-between p-5 border-b border-slate-200">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-red-500/20 rounded-xl flex items-center justify-center">
-              <Trash2 className="w-5 h-5 text-red-400" />
+            <div className="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center">
+              <Trash2 className="w-5 h-5 text-red-600" />
             </div>
             <div>
-              <h2 className="text-white font-semibold">Borrar Convocatoria</h2>
-              <p className="text-white/40 text-xs">Esta acción no se puede deshacer</p>
+              <h2 className="text-slate-800 font-semibold">Borrar Convocatoria</h2>
+              <p className="text-slate-400 text-xs">Esta acción no se puede deshacer</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-white/50 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-all">
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-all">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -80,7 +80,7 @@ export default function DeleteConvocatoriaModal({
             <>
               {/* Selector */}
               <div>
-                <label className="text-white/50 text-xs mb-1.5 block uppercase tracking-wider">
+                <label className="text-slate-500 text-xs mb-1.5 block uppercase tracking-wider">
                   Convocatoria a borrar
                 </label>
                 <select
@@ -97,14 +97,14 @@ export default function DeleteConvocatoriaModal({
 
               {/* Warning */}
               {selected && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 space-y-3">
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
                   <div className="flex gap-3">
-                    <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                    <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-red-300 text-sm font-medium">
+                      <p className="text-red-700 text-sm font-medium">
                         Se borrarán TODOS los eventos de &ldquo;{selected}&rdquo;
                       </p>
-                      <p className="text-red-400/70 text-xs mt-1">
+                      <p className="text-red-600 text-xs mt-1">
                         Esta operación eliminará permanentemente todos los registros asociados a esta convocatoria de la base de datos.
                       </p>
                     </div>
@@ -117,13 +117,13 @@ export default function DeleteConvocatoriaModal({
                       className={cn(
                         'w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all',
                         confirmed
-                          ? 'bg-red-500 border-red-500'
-                          : 'border-red-500/40 group-hover:border-red-400'
+                          ? 'bg-red-600 border-red-600'
+                          : 'border-red-300 group-hover:border-red-400'
                       )}
                     >
                       {confirmed && <span className="text-white text-[10px] font-bold">✓</span>}
                     </div>
-                    <span className="text-red-300 text-sm">
+                    <span className="text-red-700 text-sm">
                       Entiendo que esta acción es irreversible
                     </span>
                   </label>
@@ -131,18 +131,18 @@ export default function DeleteConvocatoriaModal({
               )}
 
               {error && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm">
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm">
                   {error}
                 </div>
               )}
             </>
           ) : (
             <div className="flex flex-col items-center py-6 gap-3 text-center">
-              <div className="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center">
-                <Trash2 className="w-7 h-7 text-emerald-400" />
+              <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center">
+                <Trash2 className="w-7 h-7 text-emerald-600" />
               </div>
-              <p className="text-white/80 font-medium">Convocatoria eliminada</p>
-              <p className="text-white/40 text-sm">
+              <p className="text-slate-700 font-medium">Convocatoria eliminada</p>
+              <p className="text-slate-400 text-sm">
                 Se eliminaron {deletedCount} evento{deletedCount !== 1 ? 's' : ''} de &ldquo;{selected}&rdquo;
               </p>
             </div>
@@ -150,7 +150,7 @@ export default function DeleteConvocatoriaModal({
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 p-5 border-t border-white/10">
+        <div className="flex gap-3 p-5 border-t border-slate-200">
           <button onClick={done ? () => { onSuccess(); onClose() } : onClose} className="btn-secondary flex-1">
             {done ? 'Cerrar' : 'Cancelar'}
           </button>
@@ -159,7 +159,7 @@ export default function DeleteConvocatoriaModal({
               onClick={handleDelete}
               disabled={!selected || !confirmed || deleting}
               className="flex-1 px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2
-                bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30
+                bg-red-600 text-white border border-red-600 hover:bg-red-700
                 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {deleting

@@ -85,7 +85,7 @@ export default function DatabasePage() {
       {/* Search */}
       <div className="glass-card p-4 mb-6">
         <div className="relative">
-          <Search className="w-4 h-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-300 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Filtrar datos..."
@@ -100,54 +100,54 @@ export default function DatabasePage() {
       <div className="glass-card overflow-hidden">
         <button
           onClick={() => setExpanded(prev => !prev)}
-          className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-between p-5 hover:bg-slate-50 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-brand-500/20 rounded-xl flex items-center justify-center">
-              <Table className="w-4 h-4 text-brand-400" />
+            <div className="w-9 h-9 bg-brand-50 rounded-xl flex items-center justify-center">
+              <Table className="w-4 h-4 text-brand-600" />
             </div>
             <div className="text-left">
-              <h2 className="text-white font-semibold">{TABLE_NAME}</h2>
-              <p className="text-white/40 text-xs">
+              <h2 className="text-slate-800 font-semibold">{TABLE_NAME}</h2>
+              <p className="text-slate-400 text-xs">
                 {loading ? 'Cargando...' : `${filteredRows.length} registros • ${columns.length} columnas`}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {loading && <RefreshCw className="w-4 h-4 text-white/40 animate-spin" />}
+            {loading && <RefreshCw className="w-4 h-4 text-slate-400 animate-spin" />}
             {!loading && (
-              <span className="px-2.5 py-1 bg-brand-500/20 text-brand-300 text-xs rounded-lg border border-brand-500/30">
+              <span className="px-2.5 py-1 bg-brand-50 text-brand-700 text-xs rounded-lg border border-brand-200">
                 {filteredRows.length}
               </span>
             )}
             {expanded ? (
-              <ChevronDown className="w-4 h-4 text-white/40" />
+              <ChevronDown className="w-4 h-4 text-slate-400" />
             ) : (
-              <ChevronRight className="w-4 h-4 text-white/40" />
+              <ChevronRight className="w-4 h-4 text-slate-400" />
             )}
           </div>
         </button>
 
         {expanded && (
-          <div className="border-t border-white/10">
+          <div className="border-t border-slate-200">
             {loading ? (
               <div className="p-6 space-y-2">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-8 bg-white/5 rounded animate-pulse" />
+                  <div key={i} className="h-8 bg-slate-100 rounded animate-pulse" />
                 ))}
               </div>
             ) : error ? (
-              <div className="p-6 text-red-400 text-sm">
+              <div className="p-6 text-red-600 text-sm">
                 <p className="flex items-center gap-2">
                   <Database className="w-4 h-4" />
                   Error: {error}
                 </p>
-                <p className="text-white/30 text-xs mt-2">
+                <p className="text-slate-400 text-xs mt-2">
                   Asegúrate de que la tabla existe en Supabase
                 </p>
               </div>
             ) : filteredRows.length === 0 ? (
-              <div className="p-8 text-center text-white/30 text-sm">
+              <div className="p-8 text-center text-slate-400 text-sm">
                 <Database className="w-8 h-8 mx-auto mb-2 opacity-30" />
                 {search ? 'No hay resultados para la búsqueda' : 'La tabla está vacía'}
               </div>
@@ -155,11 +155,11 @@ export default function DatabasePage() {
               <div className="overflow-x-auto scrollbar-thin">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-white/5">
+                    <tr className="bg-slate-50">
                       {columns.map(col => (
                         <th
                           key={col}
-                          className="text-left text-white/40 text-xs font-medium px-4 py-3 whitespace-nowrap uppercase tracking-wider"
+                          className="text-left text-slate-400 text-xs font-medium px-4 py-3 whitespace-nowrap uppercase tracking-wider"
                         >
                           {col}
                         </th>
@@ -170,7 +170,7 @@ export default function DatabasePage() {
                     {filteredRows.map((row, rowIdx) => (
                       <tr
                         key={rowIdx}
-                        className="border-t border-white/5 hover:bg-white/5 transition-colors group"
+                        className="border-t border-slate-100 hover:bg-slate-50 transition-colors group"
                       >
                         {columns.map(col => {
                           const value = row[col]
@@ -182,7 +182,7 @@ export default function DatabasePage() {
                             <td key={col} className="px-4 py-3 max-w-xs">
                               <div className="flex items-center gap-2">
                                 <span
-                                  className={`truncate ${isNull ? 'text-white/20 italic' : 'text-white/80'}`}
+                                  className={`truncate ${isNull ? 'text-slate-300 italic' : 'text-slate-700'}`}
                                   title={isLong ? displayValue : undefined}
                                 >
                                   {isNull ? 'null' : isLong ? displayValue.slice(0, 40) + '...' : displayValue}
@@ -193,9 +193,9 @@ export default function DatabasePage() {
                                     className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                                   >
                                     {copiedCell === displayValue ? (
-                                      <Check className="w-3 h-3 text-green-400" />
+                                      <Check className="w-3 h-3 text-green-600" />
                                     ) : (
-                                      <Copy className="w-3 h-3 text-white/30 hover:text-white/60" />
+                                      <Copy className="w-3 h-3 text-slate-300 hover:text-slate-500" />
                                     )}
                                   </button>
                                 )}

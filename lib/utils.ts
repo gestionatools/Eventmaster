@@ -26,13 +26,13 @@ export function formatDateTime(dateString: string): string {
 }
 
 export const statusColors = {
-  upcoming: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  ongoing: 'bg-green-500/20 text-green-300 border-green-500/30',
-  completed: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
-  cancelled: 'bg-red-500/20 text-red-300 border-red-500/30',
-  registered: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-  confirmed: 'bg-green-500/20 text-green-300 border-green-500/30',
-  attended: 'bg-brand-500/20 text-brand-300 border-brand-500/30',
+  upcoming: 'bg-blue-50 text-blue-700 border-blue-200',
+  ongoing: 'bg-green-50 text-green-700 border-green-200',
+  completed: 'bg-gray-100 text-gray-600 border-gray-200',
+  cancelled: 'bg-red-50 text-red-700 border-red-200',
+  registered: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+  confirmed: 'bg-green-50 text-green-700 border-green-200',
+  attended: 'bg-brand-50 text-brand-700 border-brand-200',
 }
 
 export const statusLabels = {

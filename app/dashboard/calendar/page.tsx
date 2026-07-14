@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import {
   ChevronLeft, ChevronRight, Plus, X, Calendar, Filter,
-  RefreshCw, Search, Clock, User, Tag, Hash, Layers, CalendarDays, Download, Trash2, Star
+  RefreshCw, Search, Clock, User, Tag, Hash, Layers, CalendarDays, Download, Trash2, Star, Wifi
 } from 'lucide-react'
 import { supabase, EventRow, GestionaEventRow, FINEventRow } from '@/lib/supabase'
 import TopBar from '@/components/TopBar'
@@ -18,16 +18,16 @@ import CreateSpecialFINEventModal from './CreateSpecialFINEventModal'
 
 // ─── Color palette for convocatorias ──────────────────────────────────────────
 const CONVOCATORIA_COLORS = [
-  { bg: 'bg-blue-500/80',    border: 'border-blue-400',    text: 'text-blue-100',    dot: 'bg-blue-400',    badge: 'bg-blue-500/20 text-blue-300 border-blue-500/40',    ring: 'bg-blue-400/40' },
-  { bg: 'bg-violet-500/80',  border: 'border-violet-400',  text: 'text-violet-100',  dot: 'bg-violet-400',  badge: 'bg-violet-500/20 text-violet-300 border-violet-500/40',  ring: 'bg-violet-400/40' },
-  { bg: 'bg-emerald-500/80', border: 'border-emerald-400', text: 'text-emerald-100', dot: 'bg-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', ring: 'bg-emerald-400/40' },
-  { bg: 'bg-amber-500/80',   border: 'border-amber-400',   text: 'text-amber-100',   dot: 'bg-amber-400',   badge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',   ring: 'bg-amber-400/40' },
-  { bg: 'bg-rose-500/80',    border: 'border-rose-400',    text: 'text-rose-100',    dot: 'bg-rose-400',    badge: 'bg-rose-500/20 text-rose-300 border-rose-500/40',    ring: 'bg-rose-400/40' },
-  { bg: 'bg-cyan-500/80',    border: 'border-cyan-400',    text: 'text-cyan-100',    dot: 'bg-cyan-400',    badge: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',    ring: 'bg-cyan-400/40' },
-  { bg: 'bg-orange-500/80',  border: 'border-orange-400',  text: 'text-orange-100',  dot: 'bg-orange-400',  badge: 'bg-orange-500/20 text-orange-300 border-orange-500/40',  ring: 'bg-orange-400/40' },
-  { bg: 'bg-pink-500/80',    border: 'border-pink-400',    text: 'text-pink-100',    dot: 'bg-pink-400',    badge: 'bg-pink-500/20 text-pink-300 border-pink-500/40',    ring: 'bg-pink-400/40' },
-  { bg: 'bg-teal-500/80',    border: 'border-teal-400',    text: 'text-teal-100',    dot: 'bg-teal-400',    badge: 'bg-teal-500/20 text-teal-300 border-teal-500/40',    ring: 'bg-teal-400/40' },
-  { bg: 'bg-indigo-500/80',  border: 'border-indigo-400',  text: 'text-indigo-100',  dot: 'bg-indigo-400',  badge: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',  ring: 'bg-indigo-400/40' },
+  { bg: 'bg-blue-50',    border: 'border-blue-200',    text: 'text-blue-700',    dot: 'bg-blue-500',    badge: 'bg-blue-50 text-blue-700 border-blue-200',    ring: 'bg-blue-100' },
+  { bg: 'bg-violet-50',  border: 'border-violet-200',  text: 'text-violet-700',  dot: 'bg-violet-500',  badge: 'bg-violet-50 text-violet-700 border-violet-200',  ring: 'bg-violet-100' },
+  { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', ring: 'bg-emerald-100' },
+  { bg: 'bg-amber-50',   border: 'border-amber-200',   text: 'text-amber-700',   dot: 'bg-amber-500',   badge: 'bg-amber-50 text-amber-700 border-amber-200',   ring: 'bg-amber-100' },
+  { bg: 'bg-rose-50',    border: 'border-rose-200',    text: 'text-rose-700',    dot: 'bg-rose-500',    badge: 'bg-rose-50 text-rose-700 border-rose-200',    ring: 'bg-rose-100' },
+  { bg: 'bg-cyan-50',    border: 'border-cyan-200',    text: 'text-cyan-700',    dot: 'bg-cyan-500',    badge: 'bg-cyan-50 text-cyan-700 border-cyan-200',    ring: 'bg-cyan-100' },
+  { bg: 'bg-orange-50',  border: 'border-orange-200',  text: 'text-orange-700',  dot: 'bg-orange-500',  badge: 'bg-orange-50 text-orange-700 border-orange-200',  ring: 'bg-orange-100' },
+  { bg: 'bg-pink-50',    border: 'border-pink-200',    text: 'text-pink-700',    dot: 'bg-pink-500',    badge: 'bg-pink-50 text-pink-700 border-pink-200',    ring: 'bg-pink-100' },
+  { bg: 'bg-teal-50',    border: 'border-teal-200',    text: 'text-teal-700',    dot: 'bg-teal-500',    badge: 'bg-teal-50 text-teal-700 border-teal-200',    ring: 'bg-teal-100' },
+  { bg: 'bg-indigo-50',  border: 'border-indigo-200',  text: 'text-indigo-700',  dot: 'bg-indigo-500',  badge: 'bg-indigo-50 text-indigo-700 border-indigo-200',  ring: 'bg-indigo-100' },
 ]
 
 const MONTHS_ES = [
@@ -54,48 +54,57 @@ const CONVOCATORIA_TYPE_LABELS: Record<ConvocatoriaType, string> = {
 }
 
 const CONVOCATORIA_TYPE_STYLES: Record<ConvocatoriaType, { active: string; dot: string }> = {
-  normal:     { active: 'bg-amber-500/20 text-amber-300 border-amber-500/40',    dot: 'bg-amber-400' },
-  analiza:    { active: 'bg-blue-500/20 text-blue-300 border-blue-500/40',       dot: 'bg-blue-400' },
-  developers: { active: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', dot: 'bg-emerald-400' },
+  normal:     { active: 'bg-amber-50 text-amber-700 border-amber-300',    dot: 'bg-amber-500' },
+  analiza:    { active: 'bg-blue-50 text-blue-700 border-blue-300',       dot: 'bg-blue-500' },
+  developers: { active: 'bg-emerald-50 text-emerald-700 border-emerald-300', dot: 'bg-emerald-500' },
 }
 
 // Presencial highlight style varies by convocatoria type
 const PRESENCIAL_STYLES: Record<ConvocatoriaType, { cell: string; circle: string; ring: string }> = {
-  normal:     { cell: 'bg-orange-500/20 text-orange-300 ring-1 ring-orange-500/60',  circle: 'bg-orange-500/80 ring-2 ring-orange-400',   ring: 'bg-orange-500/5' },
-  analiza:    { cell: 'bg-blue-500/20 text-blue-300 ring-1 ring-blue-500/60',        circle: 'bg-blue-500/80 ring-2 ring-blue-400',       ring: 'bg-blue-500/5' },
-  developers: { cell: 'bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/60', circle: 'bg-emerald-500/80 ring-2 ring-emerald-400', ring: 'bg-emerald-500/5' },
+  normal:     { cell: 'bg-orange-50 text-orange-700 ring-1 ring-orange-300',  circle: 'bg-orange-500 ring-2 ring-orange-300',   ring: 'bg-orange-500/8' },
+  analiza:    { cell: 'bg-blue-50 text-blue-700 ring-1 ring-blue-300',        circle: 'bg-blue-500 ring-2 ring-blue-300',       ring: 'bg-blue-500/8' },
+  developers: { cell: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-300', circle: 'bg-emerald-500 ring-2 ring-emerald-300', ring: 'bg-emerald-500/8' },
 }
 
 function getPresencialStyle(convocatoria: string | null | undefined) {
   return PRESENCIAL_STYLES[getConvocatoriaType(convocatoria)]
 }
 
+// Online highlight style — deliberately bold & fixed-hue (sky) so it reads at a
+// glance in month/year views, unlike the generic per-convocatoria dot it used to fall back to.
+const ONLINE_STYLE = {
+  cell: 'bg-sky-50 text-sky-700 ring-1 ring-sky-300',
+  circle: 'bg-sky-500 ring-2 ring-sky-300',
+  ring: 'bg-sky-500/8',
+  dot: 'bg-sky-500',
+}
+
 // Festivo highlight style (red – characteristic holiday color)
 const FESTIVO_STYLE = {
-  cell: 'bg-red-500/25 text-red-200 ring-1 ring-red-500/60',
-  circle: 'bg-red-500/90 ring-2 ring-red-400',
-  ring: 'bg-red-500/5',
+  cell: 'bg-red-50 text-red-700 ring-1 ring-red-300',
+  circle: 'bg-red-500 ring-2 ring-red-300',
+  ring: 'bg-red-500/8',
 }
 
 // Espublico highlight style (purple + hexagon indicator)
 const ESPUBLICO_STYLE = {
-  cell: 'bg-purple-500/20 text-purple-200',
-  color: 'bg-purple-500/80',
-  ring: 'bg-purple-500/5',
+  cell: 'bg-purple-50 text-purple-700',
+  color: 'bg-purple-500',
+  ring: 'bg-purple-500/8',
 }
 
 // Gestiona highlight style (teal + hexagon indicator, all-day event)
 const GESTIONA_STYLE = {
-  cell: 'bg-teal-500/20 text-teal-200 ring-1 ring-teal-500/60',
-  color: 'bg-teal-500/80',
-  ring: 'bg-teal-500/5',
+  cell: 'bg-teal-50 text-teal-700 ring-1 ring-teal-300',
+  color: 'bg-teal-500',
+  ring: 'bg-teal-500/8',
 }
 
 // FIN (Formación Interna) highlight style (yellow + diamond indicator)
 const FIN_STYLE = {
-  cell: 'bg-yellow-500/20 text-yellow-200',
-  color: 'bg-yellow-500/80',
-  ring: 'bg-yellow-500/5',
+  cell: 'bg-yellow-50 text-yellow-700',
+  color: 'bg-yellow-500',
+  ring: 'bg-yellow-500/8',
 }
 
 function isTipoFestivo(tipo: string | null | undefined) {
@@ -108,6 +117,10 @@ function isTipoEspublico(tipo: string | null | undefined) {
 
 function isTipoGestiona(tipo: string | null | undefined) {
   return (tipo ?? '').toLowerCase().includes('gestiona')
+}
+
+function isTipoOnline(tipo: string | null | undefined) {
+  return (tipo ?? '').toLowerCase().includes('online')
 }
 
 // ─── Gestiona range check ────────────────────────────────────────────────────
@@ -182,6 +195,47 @@ function sameDay(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() &&
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate()
+}
+
+// Monday-based week start for a given date
+function getWeekStart(d: Date): Date {
+  const offset = (d.getDay() + 6) % 7 // 0=Mon…6=Sun
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate() - offset)
+}
+
+// Lay out overlapping timed events into side-by-side columns within each
+// overlap cluster (classic calendar-app interval partitioning).
+function computeDayLayout<T extends { start: number; end: number }>(items: T[]): (T & { col: number; cols: number })[] {
+  const sorted = [...items].sort((a, b) => a.start - b.start)
+  const result: (T & { col: number; cols: number })[] = []
+  let cluster: (T & { col: number })[] = []
+  let colEnds: number[] = []
+  let clusterEnd = -Infinity
+
+  const flush = () => {
+    if (cluster.length === 0) return
+    const cols = colEnds.length
+    cluster.forEach(ev => result.push({ ...ev, cols }))
+    cluster = []
+    colEnds = []
+  }
+
+  sorted.forEach(ev => {
+    if (cluster.length > 0 && ev.start >= clusterEnd) {
+      flush()
+      clusterEnd = -Infinity
+    }
+    let placedCol = -1
+    for (let i = 0; i < colEnds.length; i++) {
+      if (colEnds[i] <= ev.start) { colEnds[i] = ev.end; placedCol = i; break }
+    }
+    if (placedCol === -1) { colEnds.push(ev.end); placedCol = colEnds.length - 1 }
+    cluster.push({ ...ev, col: placedCol })
+    clusterEnd = Math.max(clusterEnd, ev.end)
+  })
+  flush()
+
+  return result
 }
 
 // Parse time string "HH:MM" to minutes since midnight
@@ -278,7 +332,7 @@ function exportToICS(events: ParsedEvent[]) {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type ParsedEvent = EventRow & { _date: Date | null }
-type ViewMode = 'year' | 'month'
+type ViewMode = 'year' | 'month' | 'week'
 type MonthSpec = { year: number; month: number }
 
 const EMPTY_FORM: Partial<EventRow> = {
@@ -424,16 +478,21 @@ export default function CalendarPage() {
   const goBack = () => {
     const d = new Date(currentDate)
     if (viewMode === 'year') d.setFullYear(year - 1)
+    else if (viewMode === 'week') d.setDate(d.getDate() - 7)
     else d.setMonth(month - 1)
     setCurrentDate(d)
   }
   const goForward = () => {
     const d = new Date(currentDate)
     if (viewMode === 'year') d.setFullYear(year + 1)
+    else if (viewMode === 'week') d.setDate(d.getDate() + 7)
     else d.setMonth(month + 1)
     setCurrentDate(d)
   }
   const goToday = () => setCurrentDate(new Date())
+
+  const weekStart = useMemo(() => getWeekStart(currentDate), [currentDate])
+  const weekEnd = useMemo(() => new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 6), [weekStart])
 
   // ── Day view ────────────────────────────────────────────────────────────────
   const openDayView = (date: Date) => {
@@ -508,7 +567,13 @@ export default function CalendarPage() {
                   return `${MONTHS_ES[first.month]} – ${MONTHS_ES[last.month]} ${first.year}`
                 return `${MONTHS_ES[first.month]} ${first.year} – ${MONTHS_ES[last.month]} ${last.year}`
               })()
-            : viewMode === 'year' ? `${year}` : `${MONTHS_ES[month]} ${year}`
+            : viewMode === 'year'
+              ? `${year}`
+              : viewMode === 'week'
+                ? (weekStart.getMonth() === weekEnd.getMonth()
+                    ? `${weekStart.getDate()} – ${weekEnd.getDate()} ${MONTHS_ES[weekStart.getMonth()]} ${weekStart.getFullYear()}`
+                    : `${weekStart.getDate()} ${MONTHS_ES[weekStart.getMonth()]} – ${weekEnd.getDate()} ${MONTHS_ES[weekEnd.getMonth()]} ${weekEnd.getFullYear()}`)
+                : `${MONTHS_ES[month]} ${year}`
         }
         onRefresh={handleRefresh}
         isRefreshing={refreshing}
@@ -517,18 +582,25 @@ export default function CalendarPage() {
       {/* Toolbar */}
       <div className="glass-card p-4 mb-4 flex flex-wrap gap-3 items-center">
         {/* View toggle */}
-        <div className="flex items-center bg-white/5 rounded-xl p-1 gap-1">
+        <div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1">
+          <button
+            onClick={() => setViewMode('week')}
+            className={cn('px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5',
+              viewMode === 'week' ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-400 hover:text-slate-600')}
+          >
+            <Clock className="w-3.5 h-3.5" /> Semana
+          </button>
           <button
             onClick={() => setViewMode('month')}
             className={cn('px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5',
-              viewMode === 'month' ? 'bg-brand-500/30 text-brand-300 shadow-sm' : 'text-white/40 hover:text-white/70')}
+              viewMode === 'month' ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-400 hover:text-slate-600')}
           >
             <CalendarDays className="w-3.5 h-3.5" /> Mes
           </button>
           <button
             onClick={() => setViewMode('year')}
             className={cn('px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5',
-              viewMode === 'year' ? 'bg-brand-500/30 text-brand-300 shadow-sm' : 'text-white/40 hover:text-white/70')}
+              viewMode === 'year' ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-400 hover:text-slate-600')}
           >
             <Calendar className="w-3.5 h-3.5" /> Año
           </button>
@@ -554,13 +626,13 @@ export default function CalendarPage() {
           onClick={() => setShowFilters(v => !v)}
           className={cn('flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm transition-all border',
             showFilters || hasFilters
-              ? 'bg-brand-500/20 text-brand-300 border-brand-500/40'
-              : 'bg-white/5 text-white/50 border-white/10 hover:text-white/80')}
+              ? 'bg-brand-50 text-brand-700 border-brand-200'
+              : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800')}
         >
           <Filter className="w-3.5 h-3.5" />
           Filtros
           {hasFilters && (
-            <span className="w-4 h-4 bg-brand-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold">
+            <span className="w-4 h-4 bg-brand-600 text-white text-[10px] rounded-full flex items-center justify-center font-bold">
               {filterConvocatoria.length + (filterTipo ? 1 : 0) + (filterCodigo ? 1 : 0)}
             </span>
           )}
@@ -570,7 +642,7 @@ export default function CalendarPage() {
         <button
           onClick={() => exportToICS(filteredEvents)}
           title="Exportar calendario (.ics) compatible con Outlook 365"
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-white/5 text-white/50 border border-white/10 hover:text-white/80 hover:bg-white/10 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-white text-slate-500 border border-slate-200 hover:text-slate-800 hover:bg-slate-50 transition-all"
         >
           <Download className="w-3.5 h-3.5" /> Exportar ICS
         </button>
@@ -579,7 +651,7 @@ export default function CalendarPage() {
         <button
           onClick={() => setShowDeleteConvocatoria(true)}
           title="Borrar convocatoria"
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 hover:text-red-300 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-all"
         >
           <Trash2 className="w-3.5 h-3.5" /> Borrar
         </button>
@@ -588,7 +660,7 @@ export default function CalendarPage() {
         <button
           onClick={() => setShowCreateConvocatoria(true)}
           title="Importar convocatoria desde Excel"
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-white/5 text-white/50 border border-white/10 hover:text-white/80 hover:bg-white/10 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-white text-slate-500 border border-slate-200 hover:text-slate-800 hover:bg-slate-50 transition-all"
         >
           <CalendarDays className="w-4 h-4" /> Importar Excel
         </button>
@@ -596,7 +668,7 @@ export default function CalendarPage() {
         {/* Días festivos */}
         <button
           onClick={() => setShowHolidaysModal(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-all"
         >
           <Star className="w-4 h-4" /> Días festivos
         </button>
@@ -604,10 +676,10 @@ export default function CalendarPage() {
         {/* Create Gestiona event */}
         <button
           onClick={() => setShowCreateGestionaModal(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-all"
         >
           <span
-            className="w-3.5 h-3.5 bg-red-300"
+            className="w-3.5 h-3.5 bg-red-500"
             style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)', display: 'inline-block' }}
           />
           Crear Evento Gestiona
@@ -616,10 +688,10 @@ export default function CalendarPage() {
         {/* Create FIN event */}
         <button
           onClick={() => setShowCreateFINModal(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-yellow-500/20 text-yellow-300 border border-yellow-500/40 hover:bg-yellow-500/30 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 transition-all"
         >
           <span
-            className="w-3.5 h-3.5 bg-yellow-300 inline-block flex-shrink-0"
+            className="w-3.5 h-3.5 bg-yellow-500 inline-block flex-shrink-0"
             style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
           />
           Crear convocatoria FIN
@@ -628,10 +700,10 @@ export default function CalendarPage() {
         {/* Create special FIN event */}
         <button
           onClick={() => setShowCreateSpecialFINModal(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-yellow-500/10 text-yellow-200 border border-yellow-500/30 hover:bg-yellow-500/20 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-yellow-50/60 text-yellow-600 border border-yellow-200 hover:bg-yellow-100 transition-all"
         >
           <span
-            className="w-3.5 h-3.5 bg-yellow-200 inline-block flex-shrink-0"
+            className="w-3.5 h-3.5 bg-yellow-400 inline-block flex-shrink-0"
             style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
           />
           Añadir convocatoria especial FIN
@@ -640,7 +712,7 @@ export default function CalendarPage() {
         {/* Create convocatoria – Calendar modal */}
         <button
           onClick={() => setShowCalendarEventModal(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-all"
         >
           <Calendar className="w-4 h-4" /> Crear convocatoria
         </button>
@@ -657,7 +729,7 @@ export default function CalendarPage() {
           <div className="flex flex-wrap gap-4">
             {/* Convocatoria filter */}
             <div className="flex-1 min-w-48">
-              <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block flex items-center gap-1.5">
+              <label className="text-slate-400 text-xs uppercase tracking-wider mb-2 block flex items-center gap-1.5">
                 <Layers className="w-3 h-3" /> Convocatoria
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -669,7 +741,7 @@ export default function CalendarPage() {
                       key={c}
                       onClick={() => toggleConvocatoria(c)}
                       className={cn('px-2.5 py-1 rounded-lg text-xs border transition-all',
-                        active ? `${color?.badge} border-current` : 'bg-white/5 text-white/50 border-white/10 hover:bg-white/10'
+                        active ? `${color?.badge} border-current` : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
                       )}
                     >
                       <span className={cn('inline-block w-1.5 h-1.5 rounded-full mr-1.5', color?.dot)} />
@@ -682,7 +754,7 @@ export default function CalendarPage() {
 
             {/* Tipo filter */}
             <div className="min-w-40">
-              <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block flex items-center gap-1.5">
+              <label className="text-slate-400 text-xs uppercase tracking-wider mb-2 block flex items-center gap-1.5">
                 <Tag className="w-3 h-3" /> Tipo
               </label>
               <select
@@ -697,11 +769,11 @@ export default function CalendarPage() {
 
             {/* Código filter */}
             <div className="min-w-48">
-              <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block flex items-center gap-1.5">
+              <label className="text-slate-400 text-xs uppercase tracking-wider mb-2 block flex items-center gap-1.5">
                 <Hash className="w-3 h-3" /> Código
               </label>
               <div className="relative">
-                <Search className="w-3.5 h-3.5 text-white/30 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-3.5 h-3.5 text-slate-300 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Buscar código..."
@@ -717,7 +789,7 @@ export default function CalendarPage() {
               <div className="flex items-end">
                 <button
                   onClick={() => { setFilterConvocatoria([]); setFilterTipo(''); setFilterCodigo('') }}
-                  className="px-3 py-1.5 text-xs text-red-400 hover:text-red-300 border border-red-500/30 rounded-lg bg-red-500/10 hover:bg-red-500/20 transition-all"
+                  className="px-3 py-1.5 text-xs text-red-600 hover:text-red-700 border border-red-200 rounded-lg bg-red-50 hover:bg-red-100 transition-all"
                 >
                   Limpiar filtros
                 </button>
@@ -729,7 +801,7 @@ export default function CalendarPage() {
 
       {/* Convocatoria type selector */}
       <div className="glass-card p-3 mb-4 flex flex-wrap gap-2 items-center">
-        <span className="text-white/30 text-xs uppercase tracking-wider mr-1">Tipo convocatoria:</span>
+        <span className="text-slate-400 text-xs uppercase tracking-wider mr-1">Tipo convocatoria:</span>
         {(['normal', 'analiza', 'developers'] as ConvocatoriaType[]).map(type => {
           const active = filterTypes.includes(type)
           const style = CONVOCATORIA_TYPE_STYLES[type]
@@ -741,12 +813,12 @@ export default function CalendarPage() {
                 'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs border transition-all',
                 active
                   ? style.active
-                  : 'bg-white/5 text-white/40 border-white/10 hover:text-white/70 hover:bg-white/10'
+                  : 'bg-white text-slate-400 border-slate-200 hover:text-slate-700 hover:bg-slate-50'
               )}
             >
               <span className={cn(
                 'w-3.5 h-3.5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all',
-                active ? `${style.dot} border-current` : 'border-white/30'
+                active ? `${style.dot} border-current` : 'border-slate-300'
               )}>
                 {active && <span className="text-white text-[8px] font-bold leading-none">✓</span>}
               </span>
@@ -757,30 +829,30 @@ export default function CalendarPage() {
         {filterTypes.length > 0 && (
           <button
             onClick={() => setFilterTypes([])}
-            className="text-xs text-white/30 hover:text-white/60 transition-all"
+            className="text-xs text-slate-400 hover:text-slate-600 transition-all"
           >
             × limpiar
           </button>
         )}
 
         {/* FIN filter separator + checkbox */}
-        <span className="text-white/15 text-xs">|</span>
+        <span className="text-slate-200 text-xs">|</span>
         <button
           onClick={() => setShowFIN(v => !v)}
           className={cn(
             'flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs border transition-all',
             showFIN
-              ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40'
-              : 'bg-white/5 text-white/40 border-white/10 hover:text-white/70 hover:bg-white/10'
+              ? 'bg-yellow-50 text-yellow-700 border-yellow-300'
+              : 'bg-white text-slate-400 border-slate-200 hover:text-slate-700 hover:bg-slate-50'
           )}
         >
           <span className={cn(
             'w-3.5 h-3.5 border-2 flex items-center justify-center flex-shrink-0 transition-all',
-            showFIN ? 'border-yellow-400' : 'border-white/30'
+            showFIN ? 'border-yellow-500' : 'border-slate-300'
           )}
             style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
           >
-            {showFIN && <span className="text-yellow-300 text-[7px] font-bold leading-none">✓</span>}
+            {showFIN && <span className="text-yellow-600 text-[7px] font-bold leading-none">✓</span>}
           </span>
           FIN
         </button>
@@ -789,8 +861,8 @@ export default function CalendarPage() {
       {/* Calendar */}
       {loading ? (
         <div className="glass-card p-12 flex items-center justify-center">
-          <RefreshCw className="w-6 h-6 text-brand-400 animate-spin" />
-          <span className="ml-3 text-white/40">Cargando eventos...</span>
+          <RefreshCw className="w-6 h-6 text-brand-500 animate-spin" />
+          <span className="ml-3 text-slate-400">Cargando eventos...</span>
         </div>
       ) : viewMode === 'year' ? (
         <YearView
@@ -803,6 +875,15 @@ export default function CalendarPage() {
           gestionaEvents={gestionaEvents}
           finEvents={finEvents}
           showFIN={showFIN}
+        />
+      ) : viewMode === 'week' ? (
+        <WeekView
+          weekStart={weekStart}
+          events={filteredEvents}
+          colorMap={colorMap}
+          onDayClick={openDayView}
+          onCreateEvent={openCreate}
+          onEventClick={setSelectedEvent}
         />
       ) : (
         <MonthView
@@ -982,15 +1063,15 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
   return (
     <div className="glass-card p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-white/80 text-sm font-semibold">
+        <h3 className="text-slate-700 text-sm font-semibold">
           {MONTHS_ES[month]}
-          {showYear && <span className="text-white/40 text-xs font-normal ml-1.5">{year}</span>}
+          {showYear && <span className="text-slate-400 text-xs font-normal ml-1.5">{year}</span>}
         </h3>
-        <span className="text-white/30 text-xs">{monthEvents.length} ev.</span>
+        <span className="text-slate-300 text-xs">{monthEvents.length} ev.</span>
       </div>
       <div className="grid grid-cols-7 gap-0.5 mb-1">
         {DAYS_ES.map(d => (
-          <div key={d} className="text-white/25 text-[9px] text-center font-medium">{d[0]}</div>
+          <div key={d} className="text-slate-300 text-[9px] text-center font-medium">{d[0]}</div>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-0.5">
@@ -1005,10 +1086,12 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
           const firstEspublico  = dayEvents.find(e => isTipoEspublico(e.Tipo))
           const firstGestiona   = dayEvents.find(e => isTipoGestiona(e.Tipo))
           const firstPresencial = dayEvents.find(e => (e.Tipo ?? '').toLowerCase().includes('presencial'))
+          const firstOnline     = dayEvents.find(e => isTipoOnline(e.Tipo))
           const hasFestivo    = !!firstFestivo
           const hasEspublico  = !!firstEspublico
           const hasGestiona   = !!firstGestiona
           const hasPresencial = !!firstPresencial
+          const hasOnline     = !!firstOnline && !hasFestivo && !hasEspublico && !hasGestiona
           const presencialStyle = firstPresencial ? getPresencialStyle(firstPresencial.Convocatoria) : null
           const hasGestionaRange = isDateInGestionaRange(date, gestionaEvents)
           const hasFIN = showFIN && hasFINOnDay(date, finEvents)
@@ -1020,31 +1103,33 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
               onDoubleClick={() => onCreateEvent(date)}
               title={`${dayNum} ${MONTHS_ES[month]} — ${dayEvents.length} evento(s)${dayEvents.length ? '\n' + dayEvents.map(e => e.Actividad || e.Convocatoria).join('\n') : ''}`}
               className={cn(
-                'aspect-square rounded flex flex-col items-center justify-center relative transition-all hover:bg-white/10 group',
+                'aspect-square rounded flex flex-col items-center justify-center relative transition-all hover:bg-slate-100 group',
                 isToday
-                  ? 'bg-brand-500/30 text-brand-300 font-bold'
+                  ? 'bg-brand-50 text-brand-700 font-bold'
                   : hasFestivo
-                    ? 'font-semibold text-red-200'
+                    ? 'font-semibold text-red-700'
                     : hasEspublico
                       ? `font-semibold ${ESPUBLICO_STYLE.cell}`
                       : hasGestiona
                         ? `font-semibold ${GESTIONA_STYLE.cell}`
                         : hasPresencial
                           ? `font-semibold ${presencialStyle!.cell}`
-                          : 'text-white/50'
+                          : hasOnline
+                            ? `font-semibold ${ONLINE_STYLE.cell}`
+                            : 'text-slate-500'
               )}
             >
               {/* Gestiona range: red hexagon overlay superimposed on the day */}
               {hasGestionaRange && (
                 <span
-                  className="absolute inset-0 bg-red-500/30 pointer-events-none z-20"
+                  className="absolute inset-0 bg-red-500/20 pointer-events-none z-20"
                   style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                 />
               )}
               {/* FIN: yellow diamond overlay superimposed on the day */}
               {hasFIN && (
                 <span
-                  className="absolute inset-0 bg-yellow-500/30 pointer-events-none z-20"
+                  className="absolute inset-0 bg-yellow-500/20 pointer-events-none z-20"
                   style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
                 />
               )}
@@ -1065,38 +1150,231 @@ function MiniMonth({ year, month, events, colorMap, onDayClick, onCreateEvent, s
                     style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                   />
                 )}
-                <span className="relative z-10 text-[10px] leading-none">{dayNum}</span>
+                {!isToday && hasOnline && (
+                  <span className={cn('absolute inset-0 rounded-full', ONLINE_STYLE.circle)} />
+                )}
+                <span className={cn('relative z-10 text-[10px] leading-none', !isToday && hasOnline && 'text-white')}>{dayNum}</span>
               </span>
-              {/* Color indicators row (no dot for festivos) */}
+              {/* Color indicators row (no dot for festivos) — shows every distinct event marker for the day */}
               <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center max-w-full">
                 {hasEspublico && (
                   <span
-                    className="w-1.5 h-1.5 bg-purple-400"
+                    className="w-1.5 h-1.5 bg-purple-500"
                     style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                     title="Espublico"
                   />
                 )}
                 {hasGestiona && !hasEspublico && (
                   <span
-                    className="w-1.5 h-1.5 bg-teal-400"
+                    className="w-1.5 h-1.5 bg-teal-500"
                     style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                     title="Gestiona"
                   />
                 )}
                 {hasFIN && (
                   <span
-                    className="w-1.5 h-1.5 bg-yellow-400"
+                    className="w-1.5 h-1.5 bg-yellow-500"
                     style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
                     title="FIN"
                   />
                 )}
-                {colors.slice(0, 3).map((c, ci) => (
+                {hasOnline && (
+                  <span
+                    className="w-2 h-2 rounded-full bg-sky-500 ring-2 ring-sky-200"
+                    title="Online"
+                  />
+                )}
+                {colors.map((c, ci) => (
                   <span key={ci} className={cn('w-1.5 h-1.5 rounded-full', c)} />
                 ))}
               </div>
             </button>
           )
         })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Week View ────────────────────────────────────────────────────────────────
+// Hourly schedule grid, 7 day-columns, individual events broken out and
+// positioned by start/end time (with side-by-side layout for overlaps).
+function WeekView({ weekStart, events, colorMap, onDayClick, onCreateEvent, onEventClick }: {
+  weekStart: Date
+  events: ParsedEvent[]
+  colorMap: Map<string, typeof CONVOCATORIA_COLORS[0]>
+  onDayClick: (d: Date) => void
+  onCreateEvent: (d: Date) => void
+  onEventClick: (e: ParsedEvent) => void
+}) {
+  const today = new Date()
+  const days = Array.from({ length: 7 }, (_, i) => new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + i))
+
+  const weekEvents = events.filter(e => e._date && days.some(d => sameDay(d, e._date!)))
+
+  const allMinutes = weekEvents.flatMap(e => [
+    parseTimeToMinutes(e['Hora inicio']),
+    parseTimeToMinutes(e['Hora fin']),
+  ]).filter((v): v is number => v !== null)
+
+  const minHour = allMinutes.length > 0 ? Math.max(0, Math.floor(Math.min(...allMinutes) / 60) - 1) : 8
+  const maxHour = allMinutes.length > 0 ? Math.min(23, Math.ceil(Math.max(...allMinutes) / 60) + 1) : 20
+  const hours = Array.from({ length: maxHour - minHour + 1 }, (_, i) => minHour + i)
+  const HOUR_HEIGHT = 60
+
+  const DAYS_FULL_ES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+
+  return (
+    <div className="glass-card overflow-hidden">
+      <div className="flex overflow-x-auto scrollbar-thin">
+        {/* Time axis */}
+        <div className="w-14 flex-shrink-0 border-r border-slate-200 sticky left-0 bg-white z-20">
+          <div className="h-16 border-b border-slate-200" />
+          {hours.map(h => (
+            <div key={h} className="relative border-t border-slate-100" style={{ height: HOUR_HEIGHT }}>
+              <span className="absolute top-1 right-2 text-slate-400 text-[10px] font-mono">
+                {String(h).padStart(2, '0')}:00
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Day columns */}
+        <div className="flex flex-1 min-w-0">
+          {days.map(date => {
+            const isToday = sameDay(date, today)
+            const dayEvents = weekEvents
+              .filter(e => e._date && sameDay(e._date, date))
+              .sort((a, b) => (a['Hora inicio'] ?? '').localeCompare(b['Hora inicio'] ?? ''))
+
+            const untimedEvents = dayEvents.filter(e => parseTimeToMinutes(e['Hora inicio']) === null || isTipoGestiona(e.Tipo))
+            const timedEvents = dayEvents.filter(e => !untimedEvents.includes(e))
+
+            const laidOut = computeDayLayout(
+              timedEvents.map(e => {
+                const start = parseTimeToMinutes(e['Hora inicio'])!
+                const end = parseTimeToMinutes(e['Hora fin']) ?? start + 60
+                return { ...e, start, end: Math.max(end, start + 15) }
+              })
+            )
+
+            return (
+              <div key={date.toISOString()} className="flex-1 min-w-[150px] border-r border-slate-100 last:border-r-0 flex flex-col">
+                {/* Day header */}
+                <button
+                  onClick={() => onDayClick(date)}
+                  className={cn(
+                    'h-16 flex flex-col items-center justify-center gap-0.5 border-b border-slate-200 flex-shrink-0 sticky top-0 z-10 transition-colors',
+                    isToday ? 'bg-brand-50' : 'bg-white hover:bg-slate-50'
+                  )}
+                >
+                  <span className="text-[10px] uppercase text-slate-400 font-semibold tracking-wide">
+                    {DAYS_FULL_ES[date.getDay()].slice(0, 3)}
+                  </span>
+                  <span className={cn(
+                    'text-sm font-bold w-6 h-6 flex items-center justify-center rounded-full',
+                    isToday ? 'bg-brand-600 text-white' : 'text-slate-700'
+                  )}>
+                    {date.getDate()}
+                  </span>
+                </button>
+
+                {/* Untimed / all-day events (Gestiona, missing hours, etc.) */}
+                {untimedEvents.length > 0 && (
+                  <div className="border-b border-slate-100 bg-slate-50/60 p-1 space-y-1 flex-shrink-0">
+                    {untimedEvents.map((ev, ei) => {
+                      const color = colorMap.get(ev.Convocatoria ?? '')
+                      const evFestivo   = isTipoFestivo(ev.Tipo)
+                      const evEspublico = isTipoEspublico(ev.Tipo)
+                      const evGestiona  = isTipoGestiona(ev.Tipo)
+                      return (
+                        <button
+                          key={ei}
+                          onClick={() => onEventClick(ev)}
+                          className={cn(
+                            'w-full text-left rounded px-1.5 py-0.5 border text-[10px] leading-snug truncate flex items-center gap-1',
+                            evFestivo
+                              ? 'bg-red-50 text-red-700 border-red-200'
+                              : evEspublico
+                                ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                : evGestiona
+                                  ? 'bg-teal-50 text-teal-700 border-teal-200'
+                                  : color
+                                    ? `${color.bg} ${color.text} ${color.border}`
+                                    : 'bg-slate-100 text-slate-500 border-slate-200'
+                          )}
+                          title={ev.Actividad ?? ev.Convocatoria ?? ''}
+                        >
+                          {ev.Actividad || ev.Sesión || ev.CÓDIGO || '—'}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Hourly grid */}
+                <div
+                  className="relative flex-1 cursor-pointer"
+                  style={{ height: hours.length * HOUR_HEIGHT }}
+                  onDoubleClick={() => onCreateEvent(date)}
+                >
+                  {hours.map((h, hi) => (
+                    <div key={h} className="absolute w-full border-t border-slate-100" style={{ top: hi * HOUR_HEIGHT }} />
+                  ))}
+
+                  {laidOut.map((ev, ei) => {
+                    const color = colorMap.get(ev.Convocatoria ?? '')
+                    const evFestivo   = isTipoFestivo(ev.Tipo)
+                    const evEspublico = isTipoEspublico(ev.Tipo)
+                    const evGestiona  = isTipoGestiona(ev.Tipo)
+                    const evOnline    = isTipoOnline(ev.Tipo) && !evFestivo && !evEspublico && !evGestiona
+
+                    const top = (ev.start - minHour * 60) / 60 * HOUR_HEIGHT
+                    const height = Math.max(20, (ev.end - ev.start) / 60 * HOUR_HEIGHT)
+                    const width = 100 / ev.cols
+                    const left = ev.col * width
+
+                    return (
+                      <div
+                        key={ei}
+                        onClick={(e) => { e.stopPropagation(); onEventClick(ev) }}
+                        className={cn(
+                          'absolute rounded px-1.5 py-0.5 border overflow-hidden cursor-pointer hover:z-30 hover:shadow-md transition-shadow',
+                          evFestivo
+                            ? 'bg-red-50 border-red-300 text-red-700'
+                            : evEspublico
+                              ? 'bg-purple-50 border-purple-300 text-purple-700'
+                              : evGestiona
+                                ? 'bg-teal-50 border-teal-300 text-teal-700'
+                                : color
+                                  ? `${color.bg} ${color.border} ${color.text}`
+                                  : 'bg-slate-100 border-slate-200 text-slate-600',
+                          evOnline && 'border-l-4 border-l-sky-500'
+                        )}
+                        style={{ top: top + 1, height: height - 2, left: `calc(${left}% + 2px)`, width: `calc(${width}% - 4px)` }}
+                        title={ev.Actividad ?? ev.Convocatoria ?? ''}
+                      >
+                        <div className="flex items-center gap-1 text-[9px] font-medium leading-none mb-0.5 opacity-70">
+                          {evOnline && <Wifi className="w-2.5 h-2.5 text-sky-600 flex-shrink-0" />}
+                          <span>
+                            {ev['Hora inicio']?.slice(0, 5)}
+                            {ev['Hora fin'] ? ` – ${ev['Hora fin'].slice(0, 5)}` : ''}
+                          </span>
+                        </div>
+                        <div className="text-[10px] font-medium leading-tight truncate">
+                          {ev.Actividad || ev.CÓDIGO || '—'}
+                        </div>
+                        {height > 46 && ev.Sesión && (
+                          <div className="text-[9px] opacity-70 leading-tight truncate">{ev.Sesión}</div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
@@ -1129,21 +1407,21 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
   return (
     <div className="glass-card overflow-hidden">
       {/* Header row */}
-      <div className="grid grid-cols-7 border-b border-white/10">
+      <div className="grid grid-cols-7 border-b border-slate-200">
         {DAYS_ES.map(d => (
-          <div key={d} className="py-3 text-center text-white/40 text-xs font-semibold uppercase tracking-wider">
+          <div key={d} className="py-3 text-center text-slate-400 text-xs font-semibold uppercase tracking-wider">
             {d}
           </div>
         ))}
       </div>
 
       {/* Day cells */}
-      <div className="grid grid-cols-7 divide-x divide-white/5">
+      <div className="grid grid-cols-7 divide-x divide-slate-100">
         {Array.from({ length: totalCells }, (_, i) => {
           const dayNum = i - startOffset + 1
           const isOutside = dayNum < 1 || dayNum > daysInMonth
           if (isOutside) {
-            return <div key={i} className="min-h-28 border-b border-white/5 bg-white/[0.02]" />
+            return <div key={i} className="min-h-28 border-b border-slate-100 bg-slate-50/60" />
           }
 
           const date = new Date(year, month, dayNum)
@@ -1160,10 +1438,12 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
           const firstEspublico  = dayEvents.find(e => isTipoEspublico(e.Tipo))
           const firstGestiona   = dayEvents.find(e => isTipoGestiona(e.Tipo))
           const firstPresencial = dayEvents.find(e => (e.Tipo ?? '').toLowerCase().includes('presencial'))
+          const firstOnline     = dayEvents.find(e => isTipoOnline(e.Tipo))
           const hasFestivo    = !!firstFestivo
           const hasEspublico  = !!firstEspublico
           const hasGestiona   = !!firstGestiona
           const hasPresencial = !!firstPresencial
+          const hasOnline     = !!firstOnline && !hasFestivo && !hasEspublico && !hasGestiona
           const presencialStyle = firstPresencial ? getPresencialStyle(firstPresencial.Convocatoria) : null
           const nonFestivoEvents = dayEvents.filter(e => !isTipoFestivo(e.Tipo))
           const hasGestionaRange = isDateInGestionaRange(date, gestionaEvents)
@@ -1174,9 +1454,9 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
               key={i}
               onClick={() => onDayClick(date)}
               className={cn(
-                'group min-h-28 border-b border-white/5 p-1.5 flex flex-col cursor-pointer relative overflow-hidden',
+                'group min-h-28 border-b border-slate-100 p-1.5 flex flex-col cursor-pointer relative overflow-hidden',
                 isToday
-                  ? 'bg-brand-500/5'
+                  ? 'bg-brand-50/60'
                   : hasFestivo
                     ? FESTIVO_STYLE.ring
                     : hasEspublico
@@ -1185,22 +1465,24 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                         ? GESTIONA_STYLE.ring
                         : hasPresencial
                           ? presencialStyle!.ring
-                          : hasFIN
-                            ? FIN_STYLE.ring
-                            : 'hover:bg-white/[0.03]',
+                          : hasOnline
+                            ? ONLINE_STYLE.ring
+                            : hasFIN
+                              ? FIN_STYLE.ring
+                              : 'hover:bg-slate-50',
               )}
             >
               {/* Gestiona range: red hexagon overlay superimposed on the day cell */}
               {hasGestionaRange && (
                 <span
-                  className="absolute inset-0 bg-red-500/20 pointer-events-none z-10"
+                  className="absolute inset-0 bg-red-500/15 pointer-events-none z-10"
                   style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                 />
               )}
               {/* FIN: yellow diamond overlay superimposed on the day cell */}
               {hasFIN && (
                 <span
-                  className="absolute inset-0 bg-yellow-500/20 pointer-events-none z-10"
+                  className="absolute inset-0 bg-yellow-500/15 pointer-events-none z-10"
                   style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
                 />
               )}
@@ -1214,7 +1496,7 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                     ? 'rounded overflow-visible'
                     : 'rounded-full overflow-hidden',
                   isToday
-                    ? 'bg-brand-500 text-white'
+                    ? 'bg-brand-600 text-white'
                     : hasFestivo
                       ? 'text-white'
                       : hasEspublico
@@ -1223,9 +1505,11 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                           ? 'text-white'
                           : hasPresencial
                             ? 'text-white'
-                            : hasFIN
+                            : hasOnline
                               ? 'text-white'
-                              : (firstColor ? 'text-white/90' : 'text-white/50')
+                              : hasFIN
+                                ? 'text-white'
+                                : (firstColor ? 'text-slate-700' : 'text-slate-400')
                 )}>
                   {/* Festivo: red filled circle */}
                   {!isToday && hasFestivo && (
@@ -1245,6 +1529,14 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                       style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                     />
                   )}
+                  {/* Presencial: solid ring circle (per convocatoria type) */}
+                  {!isToday && hasPresencial && !hasFestivo && !hasEspublico && !hasGestiona && (
+                    <span className={cn('absolute inset-0 rounded-full', presencialStyle!.circle)} />
+                  )}
+                  {/* Online: bold sky circle — deliberately the same visual weight as Presencial/Festivo so it's no longer a barely-visible dot */}
+                  {!isToday && hasOnline && !hasFestivo && !hasEspublico && !hasGestiona && !hasPresencial && (
+                    <span className={cn('absolute inset-0 rounded-full', ONLINE_STYLE.circle)} />
+                  )}
                   {/* FIN: yellow diamond */}
                   {!isToday && hasFIN && !hasFestivo && !hasEspublico && !hasGestiona && (
                     <span
@@ -1253,14 +1545,14 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                     />
                   )}
                   {/* Regular event: subtle color ring */}
-                  {!isToday && !hasPresencial && !hasFestivo && !hasEspublico && !hasGestiona && firstColor && (
+                  {!isToday && !hasPresencial && !hasOnline && !hasFestivo && !hasEspublico && !hasGestiona && firstColor && (
                     <span className={cn('absolute inset-0 rounded-full', firstColor.ring)} />
                   )}
                   <span className="relative z-10">{dayNum}</span>
                 </span>
                 <button
                   onClick={(e) => { e.stopPropagation(); onCreateEvent(date) }}
-                  className="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded text-white/30 hover:text-white/70 hover:bg-white/10 transition-all"
+                  className="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded text-slate-300 hover:text-slate-600 hover:bg-slate-100 transition-all"
                   title="Crear evento"
                 >
                   <Plus className="w-3 h-3" />
@@ -1274,6 +1566,7 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                   const evFestivo   = isTipoFestivo(ev.Tipo)
                   const evEspublico = isTipoEspublico(ev.Tipo)
                   const evGestiona  = isTipoGestiona(ev.Tipo)
+                  const evOnline    = isTipoOnline(ev.Tipo) && !evFestivo && !evEspublico && !evGestiona
                   return (
                     <button
                       key={ei}
@@ -1281,28 +1574,33 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                       className={cn(
                         'w-full text-left px-1.5 py-0.5 rounded text-[10px] leading-snug truncate border transition-all hover:opacity-80 flex items-center gap-1',
                         evFestivo
-                          ? 'bg-red-500/20 text-red-200 border-red-500/40'
+                          ? 'bg-red-50 text-red-700 border-red-200'
                           : evEspublico
-                            ? 'bg-purple-500/20 text-purple-200 border-purple-500/40'
+                            ? 'bg-purple-50 text-purple-700 border-purple-200'
                             : evGestiona
-                              ? 'bg-teal-500/20 text-teal-200 border-teal-500/40'
-                              : color
-                                ? `${color.bg} ${color.text} ${color.border}`
-                                : 'bg-white/10 text-white/60 border-white/20'
+                              ? 'bg-teal-50 text-teal-700 border-teal-200'
+                              : evOnline
+                                ? 'bg-sky-50 text-sky-700 border-sky-300'
+                                : color
+                                  ? `${color.bg} ${color.text} ${color.border}`
+                                  : 'bg-slate-50 text-slate-500 border-slate-200'
                       )}
                       title={ev.Actividad ?? ev.Convocatoria ?? ''}
                     >
                       {evEspublico && (
                         <span
-                          className="w-1.5 h-1.5 bg-purple-300 flex-shrink-0"
+                          className="w-1.5 h-1.5 bg-purple-400 flex-shrink-0"
                           style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                         />
                       )}
                       {evGestiona && !evEspublico && (
                         <span
-                          className="w-1.5 h-1.5 bg-teal-300 flex-shrink-0"
+                          className="w-1.5 h-1.5 bg-teal-400 flex-shrink-0"
                           style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                         />
+                      )}
+                      {evOnline && (
+                        <Wifi className="w-2.5 h-2.5 text-sky-600 flex-shrink-0" />
                       )}
                       {ev['Hora inicio'] && !evFestivo && !evEspublico && !evGestiona && (
                         <span className="opacity-70 mr-1">{ev['Hora inicio'].slice(0, 5)}</span>
@@ -1311,16 +1609,31 @@ function MonthView({ year, month, events, colorMap, onDayClick, onCreateEvent, o
                     </button>
                   )
                 })}
+                {/* Remaining events beyond the first 3: shown as dots (not hidden) so every event point for the day stays visible */}
                 {nonFestivoEvents.length > 3 && (
-                  <span className="text-[10px] text-white/30 text-left px-1.5">
-                    +{nonFestivoEvents.length - 3} más
-                  </span>
+                  <div className="flex flex-wrap items-center gap-1 px-1.5 pt-0.5">
+                    {nonFestivoEvents.slice(3).map((ev, ei) => {
+                      const color = colorMap.get(ev.Convocatoria ?? '')
+                      const online = isTipoOnline(ev.Tipo)
+                      return (
+                        <span
+                          key={ei}
+                          title={ev.Actividad || ev.Convocatoria || ''}
+                          className={cn(
+                            'rounded-full flex-shrink-0',
+                            online ? 'w-2.5 h-2.5 ring-2 ring-sky-200 bg-sky-500' : cn('w-1.5 h-1.5', color?.dot ?? 'bg-slate-300')
+                          )}
+                        />
+                      )
+                    })}
+                    <span className="text-[9px] text-slate-400 ml-0.5">+{nonFestivoEvents.length - 3}</span>
+                  </div>
                 )}
                 {/* FIN indicator badge */}
                 {hasFIN && (
-                  <div className="w-full text-left px-1.5 py-0.5 rounded text-[10px] leading-snug truncate border bg-yellow-500/20 text-yellow-200 border-yellow-500/40 flex items-center gap-1">
+                  <div className="w-full text-left px-1.5 py-0.5 rounded text-[10px] leading-snug truncate border bg-yellow-50 text-yellow-700 border-yellow-200 flex items-center gap-1">
                     <span
-                      className="w-1.5 h-1.5 bg-yellow-300 flex-shrink-0"
+                      className="w-1.5 h-1.5 bg-yellow-400 flex-shrink-0"
                       style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
                     />
                     FIN
@@ -1375,15 +1688,15 @@ function DayViewModal({ date, events, colorMap, onClose, onCreateEvent, onEventC
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-white/10 flex-shrink-0">
+        <div className="flex items-center justify-between p-5 border-b border-slate-200 flex-shrink-0">
           <div>
-            <p className="text-white/40 text-xs uppercase tracking-wider">
+            <p className="text-slate-400 text-xs uppercase tracking-wider">
               {DAYS_FULL_ES[date.getDay()]}
             </p>
-            <h2 className="text-white font-semibold text-xl">
+            <h2 className="text-slate-800 font-semibold text-xl">
               {date.getDate()} {MONTHS_ES[date.getMonth()]} {date.getFullYear()}
             </h2>
-            <p className="text-white/30 text-xs mt-0.5">
+            <p className="text-slate-400 text-xs mt-0.5">
               {dayEvents.length} evento{dayEvents.length !== 1 ? 's' : ''}
               {dayConvocatorias.length > 0 && ` · ${dayConvocatorias.length} convocatoria${dayConvocatorias.length !== 1 ? 's' : ''}`}
             </p>
@@ -1395,7 +1708,7 @@ function DayViewModal({ date, events, colorMap, onClose, onCreateEvent, onEventC
             >
               <Plus className="w-3.5 h-3.5" /> Nuevo
             </button>
-            <button onClick={onClose} className="text-white/50 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-all">
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-all">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -1403,8 +1716,8 @@ function DayViewModal({ date, events, colorMap, onClose, onCreateEvent, onEventC
 
         {/* Content */}
         {dayEvents.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-12 text-white/30 gap-3">
-            <CalendarDays className="w-10 h-10 opacity-30" />
+          <div className="flex-1 flex flex-col items-center justify-center p-12 text-slate-300 gap-3">
+            <CalendarDays className="w-10 h-10 opacity-40" />
             <p className="text-sm">No hay eventos este día</p>
             <button onClick={() => onCreateEvent(date)} className="btn-primary text-sm flex items-center gap-1.5 px-4 py-2 mt-2">
               <Plus className="w-3.5 h-3.5" /> Crear evento
@@ -1414,12 +1727,12 @@ function DayViewModal({ date, events, colorMap, onClose, onCreateEvent, onEventC
           <div className="flex-1 overflow-auto">
             <div className="flex min-h-full">
               {/* Time axis */}
-              <div className="w-14 flex-shrink-0 border-r border-white/10 bg-white/[0.02]">
+              <div className="w-14 flex-shrink-0 border-r border-slate-200 bg-slate-50">
                 {/* Space for column headers */}
                 <div className="h-10" />
                 {hours.map(h => (
-                  <div key={h} className="relative border-t border-white/5" style={{ height: HOUR_HEIGHT }}>
-                    <span className="absolute top-1 right-2 text-white/25 text-[10px] font-mono">
+                  <div key={h} className="relative border-t border-slate-100" style={{ height: HOUR_HEIGHT }}>
+                    <span className="absolute top-1 right-2 text-slate-400 text-[10px] font-mono">
                       {String(h).padStart(2, '0')}:00
                     </span>
                   </div>
@@ -1435,13 +1748,13 @@ function DayViewModal({ date, events, colorMap, onClose, onCreateEvent, onEventC
                   )
 
                   return (
-                    <div key={conv} className="flex-1 min-w-36 border-r border-white/5 last:border-r-0 flex flex-col">
+                    <div key={conv} className="flex-1 min-w-36 border-r border-slate-100 last:border-r-0 flex flex-col">
                       {/* Column header */}
                       <div className={cn(
-                        'h-10 flex items-center gap-1.5 px-3 border-b border-white/10 flex-shrink-0 sticky top-0',
-                        color?.badge ?? 'bg-white/5 text-white/50 border-white/10'
+                        'h-10 flex items-center gap-1.5 px-3 border-b border-slate-200 flex-shrink-0 sticky top-0',
+                        color?.badge ?? 'bg-slate-50 text-slate-500 border-slate-200'
                       )}>
-                        <span className={cn('w-2 h-2 rounded-full flex-shrink-0', color?.dot ?? 'bg-white/30')} />
+                        <span className={cn('w-2 h-2 rounded-full flex-shrink-0', color?.dot ?? 'bg-slate-300')} />
                         <span className="text-[11px] font-medium truncate">{conv}</span>
                         <span className="ml-auto text-[10px] opacity-60">{convEvents.length}</span>
                       </div>
@@ -1452,7 +1765,7 @@ function DayViewModal({ date, events, colorMap, onClose, onCreateEvent, onEventC
                         {hours.map((h, hi) => (
                           <div
                             key={h}
-                            className="absolute w-full border-t border-white/5"
+                            className="absolute w-full border-t border-slate-100"
                             style={{ top: hi * HOUR_HEIGHT }}
                           />
                         ))}
@@ -1467,47 +1780,53 @@ function DayViewModal({ date, events, colorMap, onClose, onCreateEvent, onEventC
                             const evFestivo   = isTipoFestivo(ev.Tipo)
                             const evEspublico = isTipoEspublico(ev.Tipo)
                             const evGestiona  = isTipoGestiona(ev.Tipo)
+                            const evOnline    = isTipoOnline(ev.Tipo) && !evFestivo && !evEspublico && !evGestiona
                             return (
                               <div
                                 key={ei}
                                 className={cn(
                                   'mx-1 mb-1 rounded px-2 py-1 border cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-1.5',
                                   evFestivo
-                                    ? 'bg-red-500/20 border-red-500/40'
+                                    ? 'bg-red-50 border-red-200'
                                     : evEspublico
-                                      ? 'bg-purple-500/20 border-purple-500/40'
+                                      ? 'bg-purple-50 border-purple-200'
                                       : evGestiona
-                                        ? 'bg-teal-500/20 border-teal-500/40'
-                                        : color
-                                          ? `${color.bg} ${color.border}`
-                                          : 'bg-white/10 border-white/20'
+                                        ? 'bg-teal-50 border-teal-200'
+                                        : evOnline
+                                          ? 'bg-sky-50 border-sky-300'
+                                          : color
+                                            ? `${color.bg} ${color.border}`
+                                            : 'bg-slate-50 border-slate-200'
                                 )}
                                 style={{ marginTop: ei * 40 }}
                                 onClick={() => onEventClick(ev)}
                               >
                                 {evFestivo && (
-                                  <Star className="w-3 h-3 text-red-400 flex-shrink-0" />
+                                  <Star className="w-3 h-3 text-red-500 flex-shrink-0" />
                                 )}
                                 {evEspublico && (
                                   <span
-                                    className="w-2 h-2 bg-purple-300 flex-shrink-0"
+                                    className="w-2 h-2 bg-purple-400 flex-shrink-0"
                                     style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                                   />
                                 )}
                                 {evGestiona && !evEspublico && (
                                   <span
-                                    className="w-2 h-2 bg-teal-300 flex-shrink-0"
+                                    className="w-2 h-2 bg-teal-400 flex-shrink-0"
                                     style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                                   />
                                 )}
+                                {evOnline && (
+                                  <Wifi className="w-3 h-3 text-sky-600 flex-shrink-0" />
+                                )}
                                 <div className={cn(
                                   'text-[11px] font-medium truncate',
-                                  evFestivo ? 'text-red-200' : evEspublico ? 'text-purple-200' : evGestiona ? 'text-teal-200' : (color?.text ?? 'text-white/80')
+                                  evFestivo ? 'text-red-700' : evEspublico ? 'text-purple-700' : evGestiona ? 'text-teal-700' : evOnline ? 'text-sky-700' : (color?.text ?? 'text-slate-600')
                                 )}>
                                   {ev.Actividad || ev.Sesión || ev.CÓDIGO || '—'}
                                 </div>
                                 {ev.Sesión && ev.Actividad && !evFestivo && !evEspublico && !evGestiona && (
-                                  <div className={cn('text-[10px] opacity-70 truncate', color?.text ?? 'text-white/60')}>
+                                  <div className={cn('text-[10px] opacity-70 truncate', color?.text ?? 'text-slate-500')}>
                                     {ev.Sesión}
                                   </div>
                                 )}
@@ -1518,26 +1837,31 @@ function DayViewModal({ date, events, colorMap, onClose, onCreateEvent, onEventC
                           const top = (startMin - minHour * 60) / 60 * HOUR_HEIGHT
                           const durationMin = endMin !== null ? endMin - startMin : 60
                           const height = Math.max(24, durationMin / 60 * HOUR_HEIGHT)
+                          const evOnline = isTipoOnline(ev.Tipo)
 
                           return (
                             <div
                               key={ei}
                               className={cn(
                                 'absolute left-1 right-1 rounded px-2 py-1 border overflow-hidden cursor-pointer hover:opacity-90 transition-opacity',
-                                color ? `${color.bg} ${color.border}` : 'bg-white/10 border-white/20'
+                                color ? `${color.bg} ${color.border}` : 'bg-slate-50 border-slate-200',
+                                evOnline && 'border-l-4 border-l-sky-500'
                               )}
                               style={{ top: top + 1, height: height - 2 }}
                               onClick={() => onEventClick(ev)}
                             >
-                              <div className={cn('text-[10px] font-medium leading-none mb-0.5 opacity-80', color?.text ?? 'text-white/60')}>
-                                {ev['Hora inicio']?.slice(0, 5)}
-                                {ev['Hora fin'] ? ` – ${ev['Hora fin'].slice(0, 5)}` : ''}
+                              <div className={cn('flex items-center gap-1 text-[10px] font-medium leading-none mb-0.5 opacity-80', color?.text ?? 'text-slate-500')}>
+                                {evOnline && <Wifi className="w-2.5 h-2.5 text-sky-600 flex-shrink-0" />}
+                                <span>
+                                  {ev['Hora inicio']?.slice(0, 5)}
+                                  {ev['Hora fin'] ? ` – ${ev['Hora fin'].slice(0, 5)}` : ''}
+                                </span>
                               </div>
-                              <div className={cn('text-[11px] font-medium leading-tight', color?.text ?? 'text-white/80')}>
+                              <div className={cn('text-[11px] font-medium leading-tight', color?.text ?? 'text-slate-700')}>
                                 {ev.Actividad || ev.CÓDIGO || '—'}
                               </div>
                               {height > 44 && ev.Sesión && (
-                                <div className={cn('text-[10px] opacity-70 leading-tight truncate', color?.text ?? 'text-white/60')}>
+                                <div className={cn('text-[10px] opacity-70 leading-tight truncate', color?.text ?? 'text-slate-500')}>
                                   {ev.Sesión}
                                 </div>
                               )}
@@ -1588,16 +1912,16 @@ function EventDetailModal({ event, colorMap, onClose }: {
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className={cn('p-5 rounded-t-2xl border-b border-white/10', color?.bg ?? 'bg-white/10')}>
+        <div className={cn('p-5 rounded-t-2xl border-b', color ? `${color.bg} ${color.border}` : 'bg-slate-50 border-slate-200')}>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-white/60 text-xs mb-1">{event.Convocatoria}</p>
-              <h2 className="text-white font-semibold text-lg leading-tight">
+              <p className={cn('text-xs mb-1 opacity-70', color?.text ?? 'text-slate-500')}>{event.Convocatoria}</p>
+              <h2 className={cn('font-semibold text-lg leading-tight', color?.text ?? 'text-slate-800')}>
                 {event.Actividad || event.CÓDIGO || 'Evento'}
               </h2>
-              {event.Sesión && <p className="text-white/70 text-sm mt-0.5">{event.Sesión}</p>}
+              {event.Sesión && <p className={cn('text-sm mt-0.5 opacity-80', color?.text ?? 'text-slate-600')}>{event.Sesión}</p>}
             </div>
-            <button onClick={onClose} className="text-white/50 hover:text-white p-1 rounded-lg hover:bg-white/10 flex-shrink-0">
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-white/60 flex-shrink-0">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -1607,14 +1931,14 @@ function EventDetailModal({ event, colorMap, onClose }: {
         <div className="p-5 space-y-3">
           {fields.map(f => (
             <div key={f.label} className="flex items-start gap-3">
-              <span className="text-white/30 mt-0.5 flex-shrink-0">{f.icon}</span>
+              <span className="text-slate-300 mt-0.5 flex-shrink-0">{f.icon}</span>
               <div>
-                <p className="text-white/30 text-xs">{f.label}</p>
-                <p className="text-white/80 text-sm">{f.value}</p>
+                <p className="text-slate-400 text-xs">{f.label}</p>
+                <p className="text-slate-700 text-sm">{f.value}</p>
               </div>
             </div>
           ))}
-          {fields.length === 0 && <p className="text-white/30 text-sm">Sin detalles adicionales</p>}
+          {fields.length === 0 && <p className="text-slate-400 text-sm">Sin detalles adicionales</p>}
         </div>
       </div>
     </div>
@@ -1633,7 +1957,7 @@ function InputRow({ label, field, type = 'text', datalist, placeholder, formData
 }) {
   return (
     <div>
-      <label className="text-white/40 text-xs mb-1 block">{label}</label>
+      <label className="text-slate-400 text-xs mb-1 block">{label}</label>
       <div className="relative">
         <input
           type={type}
@@ -1673,21 +1997,21 @@ function CreateEventModal({ date, formData, convocatorias, tipos, saving, error,
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-white/10 sticky top-0 glass-card rounded-t-2xl z-10">
+        <div className="flex items-center justify-between p-5 border-b border-slate-200 sticky top-0 glass-card rounded-t-2xl z-10">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-brand-500/20 rounded-xl flex items-center justify-center">
-              <Plus className="w-4 h-4 text-brand-400" />
+            <div className="w-8 h-8 bg-brand-50 rounded-xl flex items-center justify-center">
+              <Plus className="w-4 h-4 text-brand-600" />
             </div>
             <div>
-              <h2 className="text-white font-semibold">Nuevo Evento</h2>
+              <h2 className="text-slate-800 font-semibold">Nuevo Evento</h2>
               {date && (
-                <p className="text-white/40 text-xs">
+                <p className="text-slate-400 text-xs">
                   {date.getDate()} {MONTHS_ES[date.getMonth()]} {date.getFullYear()}
                 </p>
               )}
             </div>
           </div>
-          <button onClick={onClose} className="text-white/50 hover:text-white p-1 rounded-lg hover:bg-white/10">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -1742,14 +2066,14 @@ function CreateEventModal({ date, formData, convocatorias, tipos, saving, error,
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm">
               {error}
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 p-5 border-t border-white/10 sticky bottom-0 glass-card rounded-b-2xl">
+        <div className="flex gap-3 p-5 border-t border-slate-200 sticky bottom-0 glass-card rounded-b-2xl">
           <button onClick={onClose} className="btn-secondary flex-1">
             Cancelar
           </button>
